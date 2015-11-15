@@ -1,7 +1,6 @@
 {
   "name": "bitexpert/adroit",
   "description": "PSR-7 Middleware based on the ADR (Action Domain Responder) paradigm.",
-  "version": "0.1.0",
   "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [
