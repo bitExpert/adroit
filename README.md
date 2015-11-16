@@ -1,6 +1,10 @@
 # bitexpert/disco
 This package provides a [PSR-7](http://www.php-fig.org/psr/psr-7/) compatible [ADR](http://pmjones.io/adr/) middleware.
 
+[![Build Status](https://travis-ci.org/bitExpert/adroit.svg?branch=master)](https://travis-ci.org/bitExpert/adroit)
+[![Dependency Status](https://www.versioneye.com/php/bitexpert:adroit/dev-master/badge.svg)](https://www.versioneye.com/php/bitexpert:adroit/dev-master)
+
+
 Installation
 ------------
 
