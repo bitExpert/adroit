@@ -12,7 +12,7 @@ namespace bitExpert\Adroit\Accept;
 
 use Negotiation\AcceptHeader;
 use Negotiation\FormatNegotiator;
-use Negotiation\NegotiatorInterface;
+use Negotiation\Negotiator;
 use Psr\Http\Message\MessageInterface;
 
 /**
@@ -23,20 +23,17 @@ use Psr\Http\Message\MessageInterface;
 class ContentNegotiationManager
 {
     /**
-     * @var NegotiatorInterface
+     * @var Negotiator
      */
     protected $negotiator;
 
     /**
      * Creates a new {@link \bitExpert\Adroit\Accept\ContentNegotiationManager}.
      *
-     * @param NegotiatorInterface|null $negotiator
+     * @param Negotiator $negotiator
      */
-    public function __construct(NegotiatorInterface $negotiator = null)
+    public function __construct(Negotiator $negotiator)
     {
-        if (null === $negotiator) {
-            $negotiator = new FormatNegotiator();
-        }
 
         $this->negotiator = $negotiator;
     }
