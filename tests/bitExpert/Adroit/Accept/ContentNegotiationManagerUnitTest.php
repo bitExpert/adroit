@@ -10,8 +10,8 @@
  */
 namespace bitExpert\Adroit\Accept;
 
-use Negotiation\AcceptHeader;
-use Negotiation\NegotiatorInterface;
+use Negotiation\Accept;
+use Negotiation\Negotiator;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Request;
 
@@ -27,11 +27,11 @@ class ContentNegotiationManagerUnitTest extends \PHPUnit_Framework_TestCase
      */
     protected $request;
     /**
-     * @var \Negotiation\NegotiatorInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var \Negotiation\Negotiator|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $negotiator;
     /**
-     * @var ContentNegotiator
+     * @var ContentNegotiationManager
      */
     protected $manager;
 
@@ -43,7 +43,7 @@ class ContentNegotiationManagerUnitTest extends \PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->request = new Request();
-        $this->negotiator = $this->getMock(NegotiatorInterface::class);
+        $this->negotiator = $this->getMock(Negotiator::class);
         $this->manager = new ContentNegotiationManager($this->negotiator);
     }
 
@@ -55,10 +55,9 @@ class ContentNegotiationManagerUnitTest extends \PHPUnit_Framework_TestCase
         $this->request = $this->request->withHeader('Accept', 'text/html');
         $this->negotiator->expects($this->once())
             ->method('getBest')
-            ->will($this->returnValue(new AcceptHeader('text/html', 1.0)));
+            ->will($this->returnValue(new Accept('text/html')));
 
-        $manager = new ContentNegotiationManager($this->negotiator);
-        $bestMatch = $manager->getBestMatch($this->request);
+        $bestMatch = $this->manager->getBestMatch($this->request);
 
         $this->assertSame('text/html', $bestMatch);
     }
@@ -73,19 +72,7 @@ class ContentNegotiationManagerUnitTest extends \PHPUnit_Framework_TestCase
             ->method('getBest')
             ->will($this->returnValue(null));
 
-        $manager = new ContentNegotiationManager($this->negotiator);
-        $bestMatch = $manager->getBestMatch($this->request);
-
-        $this->assertNull($bestMatch);
-    }
-
-    /**
-     * @test
-     */
-    public function whenNoNegotiatorWasGivenAFormatNegotiatorWillBeUsedAsFallback()
-    {
-        $manager = new ContentNegotiationManager();
-        $bestMatch = $manager->getBestMatch($this->request);
+        $bestMatch = $this->manager->getBestMatch($this->request);
 
         $this->assertNull($bestMatch);
     }

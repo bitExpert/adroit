@@ -28,7 +28,7 @@ class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
      */
     protected $request;
     /**
-     * @var bitExpert\Adroit\Domain\DomainPayload
+     * @var \bitExpert\Adroit\Domain\DomainPayload
      */
     protected $domainPayload;
     /**
@@ -57,7 +57,7 @@ class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
 
         $this->request = $this->getMock(ServerRequestInterface::class);
         $this->domainPayload = new DomainPayload('');
-        $this->manager = $this->getMock(ContentNegotiationManager::class);
+        $this->manager = $this->getMock(ContentNegotiationManager::class, [], [], '', false);
         $this->resolver1 = $this->getMock(ResponderResolver::class);
         $this->resolver2 = $this->getMock(ResponderResolver::class);
         $this->resolver = new NegotiatingResponderResolver(
