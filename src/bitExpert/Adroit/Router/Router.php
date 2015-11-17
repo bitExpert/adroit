@@ -24,7 +24,7 @@ interface Router
      *
      * @var string
      */
-    const ACTIONTOKEN_ATTR = 'bF.actionToken';
+    const ACTIONTOKEN_ATTR = 'Adroit.actionToken';
 
     /**
      * Sets the default action token. It is used to retrieve an action, if
