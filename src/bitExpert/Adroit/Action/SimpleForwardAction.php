@@ -40,6 +40,6 @@ class SimpleForwardAction extends AbstractAction
      */
     protected function execute(ServerRequestInterface $request, ResponseInterface $response)
     {
-        return $this->responder;
+        return $this->createPayload($this->responder);
     }
 }
