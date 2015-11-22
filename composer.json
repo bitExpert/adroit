@@ -19,7 +19,6 @@
     "php": "^5.5|^7.0",
     "container-interop/container-interop": "^1.1.0",
     "zendframework/zend-stratigility": "^1.1.0",
-    "twig/twig": "v1.23.1",
     "willdurand/negotiation": "v2.0.1",
     "bitexpert/slf4psrlog": "^0.1.0"
   },
