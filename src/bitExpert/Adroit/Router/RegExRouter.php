@@ -288,7 +288,8 @@ class RegExRouter implements Router
                 if (!$applicableMatcher->match($value)) {
                     throw new \InvalidArgumentException(
                         sprintf(
-                            'Could not create link to actionToken "%s": Value "%s" for param "%s" didn\'t match defined matcher of type "%s".',
+                            'Could not create link to actionToken "%s": Value "%s" for param "%s" didn\'t match defined'.
+                            ' matcher of type "%s".',
                             $actionToken,
                             $value,
                             $name,
