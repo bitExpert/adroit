@@ -38,7 +38,7 @@ class PropertyRouter implements Router
     protected $specialCharEncoding;
 
     /**
-     * Creates a new {@link \bF\Web\Router\PropertyRouter}.
+     * Creates a new {@link \bitExpert\Adroit\Router\PropertyRouter}.
      *
      * @param string $baseURL
      */
