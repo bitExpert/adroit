@@ -142,7 +142,7 @@ class RegExRouter implements Router
                 $params = $this->mapParams($urlVars);
 
                 // match params against configured matchers and only continue if valid
-                if($this->matchParams($route->getMatchers(), $params)) {
+                if ($this->matchParams($route->getMatchers(), $params)) {
                     // setting route params as query params
                     $request = $request->withQueryParams($params);
 
@@ -198,8 +198,7 @@ class RegExRouter implements Router
      */
     protected function matchParams($matchers, $urlVars)
     {
-        foreach ($urlVars as $name => $value)
-        {
+        foreach ($urlVars as $name => $value) {
             if (!isset($matchers[$name])) {
                 continue;
             }
@@ -288,8 +287,8 @@ class RegExRouter implements Router
                 if (!$applicableMatcher->match($value)) {
                     throw new \InvalidArgumentException(
                         sprintf(
-                            'Could not create link to actionToken "%s": Value "%s" for param "%s" didn\'t match defined'.
-                            ' matcher of type "%s".',
+                            'Could not create link to actionToken "%s": Value "%s" for param "%s" didn\'t match '.
+                            'defined matcher of type "%s".',
                             $actionToken,
                             $value,
                             $name,
@@ -309,7 +308,7 @@ class RegExRouter implements Router
         $missingParams = [];
 
         foreach ($params as $name => $value) {
-            if(false !== strpos($value, '[:')) {
+            if (false !== strpos($value, '[:')) {
                 $missingParams[] = $name;
             }
         }

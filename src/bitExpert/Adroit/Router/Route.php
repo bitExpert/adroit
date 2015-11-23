@@ -175,7 +175,6 @@ class Route
         $instance->methods = array_diff($instance->methods, $normalizedMethods);
 
         return $instance;
-
     }
 
     /**
