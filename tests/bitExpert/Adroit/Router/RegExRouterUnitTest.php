@@ -12,13 +12,14 @@ namespace bitExpert\Adroit\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\ServerRequest;
+use bitExpert\Adroit\Router\Matcher\Matcher;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Router\RegexRouter}.
  *
  * @covers \bitExpert\Adroit\Router\RegexRouter
  */
-class RegexRouterUnitTest extends \PHPUnit_Framework_TestCase
+class RegExRouterUnitTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var RegexRouter
@@ -36,14 +37,32 @@ class RegexRouterUnitTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
+        $matcherMockBuilder = $this->getMockBuilder(Matcher::class)->setMethods(['match']);
+
+        $notMatchingMatcher = $matcherMockBuilder->getMock();
+        $notMatchingMatcher->expects($this->any())
+            ->method('match')
+            ->will($this->returnValue(false));
+
+        $matchingMatcher = $matcherMockBuilder->getMock();
+        $matchingMatcher->expects($this->any())
+            ->method('match')
+            ->will($this->returnValue(true));
+
         $this->request = new ServerRequest();
-        $this->router = new RegexRouter('http://localhost');
+        $this->router = new RegExRouter('http://localhost');
         $this->router->setRoutes(
             [
-                new Route('GET', '/users', 'my.GetActionToken'),
-                new Route('POST', '/users', 'my.PostActionToken'),
-                new Route('GET', '/user/[:userId]', 'my.GetActionTokenWithParam'),
-                new Route('GET', '/companies', 'my.OtherGetActionToken'),
+                Route::get('/users')->to('my.GetActionToken'),
+                Route::post('/users')->to('my.PostActionToken'),
+                Route::get('/user/[:userId]')->to('my.GetActionTokenWithParam'),
+                Route::get('/companies')->to('my.OtherGetActionToken'),
+                Route::get('/offer/[:offerId]')
+                    ->to('my.GetActionTokenWithMatchedParam')
+                    ->ifMatches('offerId', $matchingMatcher),
+                Route::get('/company/[:companyId]')
+                    ->to('my.GetActionTokenWithUnmatchedParam')
+                    ->ifMatches('companyId', $notMatchingMatcher),
             ]
         );
     }
@@ -132,6 +151,26 @@ class RegexRouterUnitTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function doesNotUseRouteIfMatcherDoesNotMatch()
+    {
+        $this->request = new ServerRequest([], [], '/company/abc', 'GET');
+        $this->request = $this->router->resolveActionToken($this->request);
+        $this->assertNull($this->request->getAttribute(Router::ACTIONTOKEN_ATTR));
+    }
+
+    /**
+     * @test
+     */
+    public function usesRouteIfMatcherDoesMatch()
+    {
+        $this->request = new ServerRequest([], [], '/offer/123', 'GET');
+        $this->request = $this->router->resolveActionToken($this->request);
+        $this->assertEquals('my.GetActionTokenWithMatchedParam', $this->request->getAttribute(Router::ACTIONTOKEN_ATTR));
+    }
+
+    /**
+     * @test
+     */
     public function passingRegexRouterAsConfig()
     {
         $router = new RegexRouter('http://localhost');
@@ -155,12 +194,11 @@ class RegexRouterUnitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     * @expectedException \InvalidArgumentException
      */
-    public function returnsNullWhenMatchingRouteCouldNotBeFound()
+    public function throwsAnExceptionWhenMatchingRouteCouldNotBeFound()
     {
-        $url = $this->router->createLink('nonexistent.actionToken');
-
-        $this->assertNull($url);
+        $this->router->createLink('nonexistent.actionToken');
     }
 
     /**
@@ -205,11 +243,19 @@ class RegexRouterUnitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     * @expectedException \InvalidArgumentException
      */
-    public function willReturnNullWhenNotAllParamReplacementsAreProvided()
+    public function willThrowAnExceptionWhenNotAllParamReplacementsAreProvided()
     {
-        $url = $this->router->createLink('my.GetActionTokenWithParam', ['sampleId' => 123]);
+        $this->router->createLink('my.GetActionTokenWithParam', ['sampleId' => 123]);
+    }
 
-        $this->assertNull($url);
+    /**
+     * @test
+     * @expectedException \InvalidArgumentException
+     */
+    public function willThrowAnExceptionWhenProvidingNotMatchingParams()
+    {
+        $this->router->createLink('my.GetActionTokenWithUnmatchedParam', ['companyId' => 'abc']);
     }
 }

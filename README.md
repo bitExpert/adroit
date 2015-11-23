@@ -80,6 +80,27 @@ $router->setRoutes(
 );
 ```
 
+Routes
+------
+Routes in Adroit are implemented immutual. You may define your routes in several styles:
+
+```php
+new Route('GET', '/', 'index');
+Route::create('GET', '/', 'index');
+Route::get('/')->to('index');
+Route::create()->from('/')->to('index')->accepting('GET');
+```
+
+You may also mix all the styles above, just as you like, since every method returns a new instance of route.
+
+Matchers
+--------
+Matchers are used to ensure that your route params match given criteria such as digits only:
+
+```php
+Route::get('/user/[:id]')->to('users')->ifMatches('id', new NumericMatcher());
+```
+
 Actions
 -------
 
