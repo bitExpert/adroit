@@ -15,7 +15,7 @@ use bitExpert\Adroit\Action\Resolver\ActionResolver;
 use bitExpert\Adroit\Domain\DomainPayload;
 use bitExpert\Adroit\Responder\Resolver\ResponderResolver;
 use bitExpert\Adroit\Responder\Responder;
-use bitExpert\Adroit\Router\Router;
+use bitExpert\Pathfinder\Router;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\NullLogger;
 use Zend\Diactoros\Response;
@@ -176,7 +176,7 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     public function actionResolverIgnoresRevolversThatDoNotMatchTheNeededInterface()
     {
         $this->router->expects($this->once())
-            ->method('resolveActionToken')
+            ->method('match')
             ->will($this->returnValue($this->request));
 
         $this->middleware = new AdroitMiddleware(
@@ -198,7 +198,7 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('prepareAndExecute')
             ->will($this->returnValue($returnValue));
         $this->router->expects($this->once())
-            ->method('resolveActionToken')
+            ->method('match')
             ->will($this->returnValue($this->request));
         $this->actionResolver->expects($this->once())
             ->method('resolve')
@@ -227,7 +227,7 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('prepareAndExecute')
             ->will($this->returnValue($domainPayload));
         $this->router->expects($this->once())
-            ->method('resolveActionToken')
+            ->method('match')
             ->will($this->returnValue($this->request));
 
         $this->middleware = $this->getMock(
@@ -252,7 +252,7 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('prepareAndExecute')
             ->will($this->returnValue($domainPayload));
         $this->router->expects($this->once())
-            ->method('resolveActionToken')
+            ->method('match')
             ->will($this->returnValue($this->request));
 
         $returnValue = $this->buildResponse('<html>', 200);

@@ -4,9 +4,62 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "13ac808abe1dda61caa2e4db8d6d4876",
-    "content-hash": "3c15427a231e40a8a80a24ab2af09a33",
+    "hash": "5a4690b933f35b4050013eb188249d6c",
+    "content-hash": "0b85f4a64e2ae01025a8a53f67d45775",
     "packages": [
+        {
+            "name": "bitexpert/pathfinder",
+            "version": "0.1.1",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:bitExpert/pathfinder.git",
+                "reference": "0c83d6cf32f004f160b4a2e9c5269f41d06617c1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bitExpert/pathfinder/zipball/0c83d6cf32f004f160b4a2e9c5269f41d06617c1",
+                "reference": "0c83d6cf32f004f160b4a2e9c5269f41d06617c1",
+                "shasum": ""
+            },
+            "require": {
+                "bitexpert/slf4psrlog": "^0.1.0",
+                "php": "^5.5|^7.0"
+            },
+            "require-dev": {
+                "bitexpert/phing-securitychecker": "^0.2.1",
+                "monolog/monolog": "^1.14.0",
+                "phing/phing": "^2.8.0",
+                "phpdocumentor/phpdocumentor": "^2.8",
+                "phpunit/php-code-coverage": "^2.1.0",
+                "phpunit/phpunit": "^4.8",
+                "squizlabs/php_codesniffer": "^2.3",
+                "zendframework/zend-diactoros": "^1.0.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "bitExpert\\Pathfinder\\": "src/bitExpert/Pathfinder"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Stephan Hochdörfer",
+                    "email": "S.Hochdoerfer@bitExpert.de",
+                    "homepage": "http://www.bitExpert.de"
+                },
+                {
+                    "name": "Peter Hildenbrand",
+                    "email": "P.Hildenbrand@bitExpert.de",
+                    "homepage": "http://www.bitExpert.de"
+                }
+            ],
+            "description": "PSR-7 compatible routing component",
+            "time": "2015-11-29 09:10:38"
+        },
         {
             "name": "bitexpert/slf4psrlog",
             "version": "0.1.3",

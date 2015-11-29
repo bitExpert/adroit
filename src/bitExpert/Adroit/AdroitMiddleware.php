@@ -15,9 +15,8 @@ use bitExpert\Adroit\Action\Resolver\ActionResolver;
 use bitExpert\Adroit\Domain\DomainPayloadInterface;
 use bitExpert\Adroit\Responder\Resolver\ResponderResolver;
 use bitExpert\Adroit\Responder\Responder;
-use bitExpert\Adroit\Router\Router;
+use bitExpert\Pathfinder\Router;
 use bitExpert\Slf4PsrLog\LoggerFactory;
-use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
@@ -43,7 +42,7 @@ class AdroitMiddleware implements MiddlewareInterface
      */
     protected $responderResolvers;
     /**
-     * @var \bitExpert\Adroit\Router\Router
+     * @var \bitExpert\Pathfinder\Router
      */
     protected $router;
 
@@ -115,7 +114,7 @@ class AdroitMiddleware implements MiddlewareInterface
      */
     protected function resolveActionToken(ServerRequestInterface $request)
     {
-        return $this->router->resolveActionToken($request);
+        return $this->router->match($request);
     }
 
     /**
