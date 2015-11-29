@@ -3,7 +3,7 @@
   "description": "PSR-7 Middleware based on the ADR (Action Domain Responder) paradigm.",
   "version": "0.1.2",
   "minimum-stability": "stable",
-  "license": "proprietary",
+  "license": "Apache-2.0",
   "authors": [
     {
       "name": "Peter Hildenbrand",
