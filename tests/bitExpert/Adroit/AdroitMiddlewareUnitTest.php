@@ -84,7 +84,13 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('prepareAndExecute')
             ->will($this->returnValue($returnValue));
 
-        $this->middleware = $this->getMock(AdroitMiddleware::class, ['resolveActionToken', 'resolveAction'], [], '', false);
+        $this->middleware = $this->getMock(
+            AdroitMiddleware::class,
+            ['resolveActionToken', 'resolveAction'],
+            [],
+            '',
+            false
+        );
         $this->middleware->expects($this->once())
             ->method('resolveActionToken')
             ->will($this->returnValue($this->request));
@@ -112,7 +118,13 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('prepareAndExecute')
             ->will($this->returnValue($domainPayload));
 
-        $this->middleware = $this->getMock(AdroitMiddleware::class, ['resolveActionToken', 'resolveAction', 'resolveResponder'], [], '', false);
+        $this->middleware = $this->getMock(
+            AdroitMiddleware::class,
+            ['resolveActionToken', 'resolveAction', 'resolveResponder'],
+            [],
+            '',
+            false
+        );
         $this->middleware->expects($this->once())
             ->method('resolveActionToken')
             ->will($this->returnValue($this->request));
@@ -138,7 +150,13 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('prepareAndExecute')
             ->will($this->returnValue($mar));
 
-        $this->middleware = $this->getMock(AdroitMiddleware::class, ['resolveActionToken', 'resolveAction'], [], '', false);
+        $this->middleware = $this->getMock(
+            AdroitMiddleware::class,
+            ['resolveActionToken', 'resolveAction'],
+            [],
+            '',
+            false
+        );
         $this->middleware->expects($this->once())
             ->method('resolveActionToken')
             ->will($this->returnValue($this->request));
@@ -161,7 +179,11 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('resolveActionToken')
             ->will($this->returnValue($this->request));
 
-        $this->middleware = new AdroitMiddleware([new \stdClass, new \stdClass], [$this->responderResolver], $this->router);
+        $this->middleware = new AdroitMiddleware(
+            [new \stdClass, new \stdClass],
+            [$this->responderResolver],
+            $this->router
+        );
 
         $this->middleware->__invoke($this->request, new Response());
     }
@@ -185,7 +207,11 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $actionResolver2->expects($this->never())
             ->method('resolve');
 
-        $this->middleware = new AdroitMiddleware([$this->actionResolver, $actionResolver2], [$this->responderResolver], $this->router);
+        $this->middleware = new AdroitMiddleware(
+            [$this->actionResolver, $actionResolver2],
+            [$this->responderResolver],
+            $this->router
+        );
         $response = $this->middleware->__invoke($this->request, new Response());
         $this->assertSame($returnValue, $response);
     }
@@ -204,7 +230,11 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('resolveActionToken')
             ->will($this->returnValue($this->request));
 
-        $this->middleware = $this->getMock(AdroitMiddleware::class, ['resolveAction'], [[], [new \stdClass()], $this->router]);
+        $this->middleware = $this->getMock(
+            AdroitMiddleware::class,
+            ['resolveAction'],
+            [[], [new \stdClass()], $this->router]
+        );
         $this->middleware->expects($this->once())
             ->method('resolveAction')
             ->will($this->returnValue($this->action));
@@ -236,7 +266,11 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $responderResolver2->expects($this->never())
             ->method('resolve');
 
-        $this->middleware = $this->getMock(AdroitMiddleware::class, ['resolveAction'], [[], [$this->responderResolver, $responderResolver2], $this->router]);
+        $this->middleware = $this->getMock(
+            AdroitMiddleware::class,
+            ['resolveAction'],
+            [[], [$this->responderResolver, $responderResolver2], $this->router]
+        );
         $this->middleware->expects($this->once())
             ->method('resolveAction')
             ->will($this->returnValue($this->action));
