@@ -3,8 +3,8 @@ This package provides a [PSR-7](http://www.php-fig.org/psr/psr-7/) compatible [A
 Have a look at the [adroit-disco-demo](https://github.com/bitExpert/adroit-disco-demo) project to find out how to use
 Adroit.
 
-[![Build Status](https://travis-ci.org/bitExpert/adroit.svg?branch=master)](https://travis-ci.org/bitExpert/adroit)
-[![Dependency Status](https://www.versioneye.com/php/bitexpert:adroit/dev-master/badge.svg)](https://www.versioneye.com/php/bitexpert:adroit/dev-master)
+[![Build Status](https://travis-ci.org/bitExpert/adroit.svg?branch=release%2Fr0.3.0)](https://travis-ci.org/bitExpert/adroit)
+[![Dependency Status](https://www.versioneye.com/php/bitexpert:adroit/0.3.1/badge?style=flat)](https://www.versioneye.com/php/bitexpert:adroit/0.3.1)
 
 
 Installation
