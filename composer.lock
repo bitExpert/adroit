@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5dbc97559ed893d7fa311f4ee86bca71",
-    "content-hash": "425b11d69bc8b299ebf3c86b95fb3a94",
+    "hash": "5f083692c3f5d927396cb00c9eb655ed",
+    "content-hash": "ae90419212b3d456f387a0fcb56a6181",
     "packages": [
         {
             "name": "bitexpert/pathfinder",
