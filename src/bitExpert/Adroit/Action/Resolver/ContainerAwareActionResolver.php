@@ -11,7 +11,6 @@
 namespace bitExpert\Adroit\Action\Resolver;
 
 use bitExpert\Adroit\Action\Action;
-use bitExpert\Adroit\Router\Router;
 use bitExpert\Slf4PsrLog\LoggerFactory;
 use Exception;
 use Interop\Container\ContainerInterface;
@@ -31,16 +30,21 @@ class ContainerAwareActionResolver implements ActionResolver
      * @var \Psr\Log\LoggerInterface the logger instance.
      */
     protected $logger;
+    /**
+     * @var string The request attribute to find the target in
+     */
+    protected $targetRequestAttribute;
 
     /**
      * Creates a new {@link \bitExpert\Adroit\Action\Resolver\ContainerAwareActionResolver}.
      *
      * @param ContainerInterface $container
+     * @param string $targetRequestAttribute
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, $targetRequestAttribute)
     {
         $this->container = $container;
-
+        $this->targetRequestAttribute = $targetRequestAttribute;
         $this->logger = LoggerFactory::getLogger(__CLASS__);
     }
 
@@ -49,7 +53,7 @@ class ContainerAwareActionResolver implements ActionResolver
      */
     public function resolve(ServerRequestInterface $request)
     {
-        $actionToken = $request->getAttribute(Router::ACTIONTOKEN_ATTR);
+        $actionToken = $request->getAttribute($this->targetRequestAttribute);
         if (!$this->container->has($actionToken)) {
             $this->logger->error(
                 sprintf(
