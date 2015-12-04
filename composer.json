@@ -22,7 +22,7 @@
     "twig/twig": "v1.23.1",
     "willdurand/negotiation": "v2.0.1",
     "bitexpert/slf4psrlog": "^0.1.0",
-    "bitexpert/pathfinder": "^0.1.0"
+    "bitexpert/pathfinder": "^0.2.0"
   },
   "require-dev": {
     "phpunit/php-code-coverage": "^2.1.0",
