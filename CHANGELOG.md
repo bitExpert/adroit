@@ -24,10 +24,10 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
--  [#16](https://github.com/bitExpert/disco/pull/16) Ported bitExpert internal Phing setup over to the adroit package. 
--  [#14](https://github.com/bitExpert/disco/pull/14) Remove PHP 7 from allow_failures Travis configuration 
--  [#12](https://github.com/bitExpert/disco/pull/12) Extended documentation with a link to the adroit-disco-demo project. 
--  [#11](https://github.com/bitExpert/disco/pull/11) Routing enhancement 
+-  [#16](https://github.com/bitExpert/adroit/pull/16) Ported bitExpert internal Phing setup over to the adroit package. 
+-  [#14](https://github.com/bitExpert/adroit/pull/14) Remove PHP 7 from allow_failures Travis configuration 
+-  [#12](https://github.com/bitExpert/adroit/pull/12) Extended documentation with a link to the adroit-disco-demo project. 
+-  [#11](https://github.com/bitExpert/adroit/pull/11) Routing enhancement 
 
 ### Deprecated
 
@@ -35,7 +35,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Removed
 
-- As of [#11](https://github.com/bitExpert/disco/pull/11) the \bitExpert\Adroit\Router package got replaced by bitexpert/pathfinder.
+- As of [#11](https://github.com/bitExpert/adroit/pull/11) the \bitExpert\Adroit\Router package got replaced by bitexpert/pathfinder.
 
 ### Fixed
 
@@ -45,9 +45,9 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Added
 
--  [#4](https://github.com/bitExpert/disco/pull/4) Added documentation. 
--  [#3](https://github.com/bitExpert/disco/pull/3) Made $request and $response params required in WebApplication. 
--  [#2](https://github.com/bitExpert/disco/pull/2) Upgraded willdurand/negotiation to version v2.0.1.
+-  [#4](https://github.com/bitExpert/adroit/pull/4) Added documentation. 
+-  [#3](https://github.com/bitExpert/adroit/pull/3) Made $request and $response params required in WebApplication. 
+-  [#2](https://github.com/bitExpert/adroit/pull/2) Upgraded willdurand/negotiation to version v2.0.1.
 
 ### Deprecated
 
@@ -59,9 +59,9 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
--  [#10](https://github.com/bitExpert/disco/pull/10) Fixed SimpleForwardAction to always return a DomainPayload object. 
--  [#5](https://github.com/bitExpert/disco/pull/5) Fixed typo. 
+-  [#10](https://github.com/bitExpert/adroit/pull/10) Fixed SimpleForwardAction to always return a DomainPayload object. 
+-  [#5](https://github.com/bitExpert/adroit/pull/5) Fixed typo. 
 
 ## 0.1.0
 
-Initial release of the Disco package.
+Initial release of the Adroit package.
