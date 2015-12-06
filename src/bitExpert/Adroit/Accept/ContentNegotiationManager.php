@@ -11,7 +11,6 @@
 namespace bitExpert\Adroit\Accept;
 
 use Negotiation\AcceptHeader;
-use Negotiation\FormatNegotiator;
 use Negotiation\Negotiator;
 use Psr\Http\Message\MessageInterface;
 
