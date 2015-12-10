@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5dbc97559ed893d7fa311f4ee86bca71",
-    "content-hash": "425b11d69bc8b299ebf3c86b95fb3a94",
+    "hash": "1f36c8ec839aab0e1f72a9e265ae3efa",
+    "content-hash": "ea7b246a0a8dc2e448d6e79465f14cd5",
     "packages": [
         {
             "name": "bitexpert/pathfinder",
-            "version": "0.2.1",
+            "version": "0.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bitExpert/pathfinder.git",
-                "reference": "1b149a3da1a40259657e87119d3c16e8faa74641"
+                "reference": "e9653437b266c4e068598f8f7c5c0fdb0824ace9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bitExpert/pathfinder/zipball/1b149a3da1a40259657e87119d3c16e8faa74641",
-                "reference": "1b149a3da1a40259657e87119d3c16e8faa74641",
+                "url": "https://api.github.com/repos/bitExpert/pathfinder/zipball/e9653437b266c4e068598f8f7c5c0fdb0824ace9",
+                "reference": "e9653437b266c4e068598f8f7c5c0fdb0824ace9",
                 "shasum": ""
             },
             "require": {
@@ -58,7 +58,7 @@
                 }
             ],
             "description": "PSR-7 compatible routing component",
-            "time": "2015-12-04 16:24:02"
+            "time": "2015-12-07 20:41:52"
         },
         {
             "name": "bitexpert/slf4psrlog",
@@ -2320,28 +2320,28 @@
         },
         {
             "name": "sebastian/diff",
-            "version": "1.3.0",
+            "version": "1.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/diff.git",
-                "reference": "863df9687835c62aa423a22412d26fa2ebde3fd3"
+                "reference": "13edfd8706462032c2f52b4b862974dd46b71c9e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/863df9687835c62aa423a22412d26fa2ebde3fd3",
-                "reference": "863df9687835c62aa423a22412d26fa2ebde3fd3",
+                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/13edfd8706462032c2f52b4b862974dd46b71c9e",
+                "reference": "13edfd8706462032c2f52b4b862974dd46b71c9e",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.2"
+                "phpunit/phpunit": "~4.8"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.3-dev"
+                    "dev-master": "1.4-dev"
                 }
             },
             "autoload": {
@@ -2364,11 +2364,11 @@
                 }
             ],
             "description": "Diff implementation",
-            "homepage": "http://www.github.com/sebastianbergmann/diff",
+            "homepage": "https://github.com/sebastianbergmann/diff",
             "keywords": [
                 "diff"
             ],
-            "time": "2015-02-22 15:13:53"
+            "time": "2015-12-08 07:14:41"
         },
         {
             "name": "sebastian/environment",
@@ -2539,16 +2539,16 @@
         },
         {
             "name": "sebastian/recursion-context",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/recursion-context.git",
-                "reference": "994d4a811bafe801fb06dccbee797863ba2792ba"
+                "reference": "913401df809e99e4f47b27cdd781f4a258d58791"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/recursion-context/zipball/994d4a811bafe801fb06dccbee797863ba2792ba",
-                "reference": "994d4a811bafe801fb06dccbee797863ba2792ba",
+                "url": "https://api.github.com/repos/sebastianbergmann/recursion-context/zipball/913401df809e99e4f47b27cdd781f4a258d58791",
+                "reference": "913401df809e99e4f47b27cdd781f4a258d58791",
                 "shasum": ""
             },
             "require": {
@@ -2588,7 +2588,7 @@
             ],
             "description": "Provides functionality to recursively process PHP variables",
             "homepage": "http://www.github.com/sebastianbergmann/recursion-context",
-            "time": "2015-06-21 08:04:50"
+            "time": "2015-11-11 19:50:13"
         },
         {
             "name": "sebastian/version",
@@ -3568,16 +3568,16 @@
         },
         {
             "name": "zendframework/zend-eventmanager",
-            "version": "2.5.2",
+            "version": "2.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-eventmanager.git",
-                "reference": "135af03d07fd048c322259aab6611d2be290475c"
+                "reference": "a03de810b99b0302059ab744c535d464b8dc4721"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-eventmanager/zipball/135af03d07fd048c322259aab6611d2be290475c",
-                "reference": "135af03d07fd048c322259aab6611d2be290475c",
+                "url": "https://api.github.com/repos/zendframework/zend-eventmanager/zipball/a03de810b99b0302059ab744c535d464b8dc4721",
+                "reference": "a03de810b99b0302059ab744c535d464b8dc4721",
                 "shasum": ""
             },
             "require": {
@@ -3585,14 +3585,15 @@
                 "zendframework/zend-stdlib": "~2.5"
             },
             "require-dev": {
+                "athletic/athletic": "dev-master",
                 "fabpot/php-cs-fixer": "1.7.*",
                 "phpunit/phpunit": "~4.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.5-dev",
-                    "dev-develop": "2.6-dev"
+                    "dev-master": "2.6-dev",
+                    "dev-develop": "3.0-dev"
                 }
             },
             "autoload": {
@@ -3609,7 +3610,7 @@
                 "eventmanager",
                 "zf2"
             ],
-            "time": "2015-07-16 19:00:49"
+            "time": "2015-10-06 11:53:40"
         },
         {
             "name": "zendframework/zend-filter",

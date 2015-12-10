@@ -16,6 +16,7 @@ use bitExpert\Adroit\Domain\DomainPayload;
 use bitExpert\Adroit\Responder\Resolver\ResponderResolver;
 use bitExpert\Adroit\Responder\Responder;
 use bitExpert\Pathfinder\Router;
+use bitExpert\Pathfinder\RoutingResult;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\NullLogger;
 use Zend\Diactoros\Response;
@@ -86,14 +87,15 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $this->middleware = $this->getMock(
             AdroitMiddleware::class,
-            ['resolveActionToken', 'resolveAction'],
+            ['resolveRoutingResult', 'resolveAction'],
             [],
             '',
             false
         );
         $this->middleware->expects($this->once())
-            ->method('resolveActionToken')
-            ->will($this->returnValue($this->request));
+            ->method('resolveRoutingResult')
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction')));
+
         $this->middleware->expects($this->once())
             ->method('resolveAction')
             ->will($this->returnValue($this->action));
@@ -120,14 +122,14 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $this->middleware = $this->getMock(
             AdroitMiddleware::class,
-            ['resolveActionToken', 'resolveAction', 'resolveResponder'],
+            ['resolveRoutingResult', 'resolveAction', 'resolveResponder'],
             [],
             '',
             false
         );
         $this->middleware->expects($this->once())
-            ->method('resolveActionToken')
-            ->will($this->returnValue($this->request));
+            ->method('resolveRoutingResult')
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction')));
         $this->middleware->expects($this->once())
             ->method('resolveAction')
             ->will($this->returnValue($this->action));
@@ -152,14 +154,14 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $this->middleware = $this->getMock(
             AdroitMiddleware::class,
-            ['resolveActionToken', 'resolveAction'],
+            ['resolveRoutingResult', 'resolveAction'],
             [],
             '',
             false
         );
         $this->middleware->expects($this->once())
-            ->method('resolveActionToken')
-            ->will($this->returnValue($this->request));
+            ->method('resolveRoutingResult')
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction')));
         $this->middleware->expects($this->once())
             ->method('resolveAction')
             ->will($this->returnValue($this->action));
@@ -171,13 +173,35 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     */
+    public function whenRoutingResultDoesNotContainTarget404ResponseGetsReturned()
+    {
+        $this->middleware = $this->getMock(
+            AdroitMiddleware::class,
+            ['resolveRoutingResult', 'resolveAction'],
+            [],
+            '',
+            false
+        );
+        $this->middleware->expects($this->once())
+            ->method('resolveRoutingResult')
+            ->will($this->returnValue(RoutingResult::forFailure()));
+
+        $this->injectLogger($this->middleware);
+
+        $response = $this->middleware->__invoke($this->request, new Response());
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+
+    /**
+     * @test
      * @expectedException \RuntimeException
      */
     public function actionResolverIgnoresRevolversThatDoNotMatchTheNeededInterface()
     {
         $this->router->expects($this->once())
             ->method('match')
-            ->will($this->returnValue($this->request));
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction')));
 
         $this->middleware = new AdroitMiddleware(
             [new \stdClass, new \stdClass],
@@ -199,7 +223,7 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($returnValue));
         $this->router->expects($this->once())
             ->method('match')
-            ->will($this->returnValue($this->request));
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction')));
         $this->actionResolver->expects($this->once())
             ->method('resolve')
             ->will($this->returnValue($this->action));
@@ -228,7 +252,7 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($domainPayload));
         $this->router->expects($this->once())
             ->method('match')
-            ->will($this->returnValue($this->request));
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction')));
 
         $this->middleware = $this->getMock(
             AdroitMiddleware::class,
@@ -253,7 +277,7 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($domainPayload));
         $this->router->expects($this->once())
             ->method('match')
-            ->will($this->returnValue($this->request));
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction')));
 
         $returnValue = $this->buildResponse('<html>', 200);
         $this->responder->expects($this->once())
@@ -277,6 +301,96 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $response = $this->middleware->__invoke($this->request, new Response());
         $this->assertSame($returnValue, $response);
+    }
+
+    /**
+     * @test
+     */
+    public function mergesMatchedParamsOfRoute()
+    {
+        $testCase = $this;
+        $queryParams = [
+            'queryParam1' => 'queryValue1',
+            'queryParam2' => 'queryValue2',
+            'queryParam3' => 'queryValue3'
+        ];
+
+        $routeParams = [
+            'routeParam1' => 'value1',
+            'routeParam2' => 'value2'
+        ];
+
+        $mergedParams = array_merge($queryParams, $routeParams);
+
+        $this->request = $this->request->withQueryParams($queryParams);
+
+        $this->router->expects($this->once())
+            ->method('match')
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction', $routeParams)));
+
+        $this->action->expects($this->once())
+            ->method('prepareAndExecute')
+            ->will($this->returnCallback(function (ServerRequestInterface $request) use ($testCase, $mergedParams) {
+                $queryParams = $request->getQueryParams();
+                $this->assertArraySubset($mergedParams, $queryParams);
+            }));
+
+
+        $this->middleware = $this->getMock(
+            AdroitMiddleware::class,
+            ['resolveAction'],
+            [[], [new \stdClass()], $this->router]
+        );
+
+        $this->middleware->expects($this->once())
+            ->method('resolveAction')
+            ->will($this->returnValue($this->action));
+
+
+        $this->middleware->__invoke($this->request, new Response());
+    }
+
+    /**
+     * @test
+     */
+    public function givesMatchedParamsOfRoutePriority()
+    {
+        $testCase = $this;
+        $routeParams = [
+            'sharedParam1' => 'routeValue1',
+            'sharedParam2' => 'routeValue2'
+        ];
+
+        $queryParams =[
+            'sharedParam1' => 'requestValue1',
+            'sharedParam2' => 'requestValue2'
+        ];
+
+        $this->router->expects($this->once())
+            ->method('match')
+            ->will($this->returnValue(RoutingResult::forSuccess('myaction', $routeParams)));
+
+        $this->action->expects($this->once())
+            ->method('prepareAndExecute')
+            ->will($this->returnCallback(function (ServerRequestInterface $request) use ($testCase, $routeParams) {
+                $queryParams = $request->getQueryParams();
+                $this->assertArraySubset($routeParams, $queryParams);
+            }));
+
+
+        $this->middleware = $this->getMock(
+            AdroitMiddleware::class,
+            ['resolveAction'],
+            [[], [new \stdClass()], $this->router]
+        );
+
+        $this->middleware->expects($this->once())
+            ->method('resolveAction')
+            ->will($this->returnValue($this->action));
+
+        $this->request = $this->request->withQueryParams($queryParams);
+
+        $this->middleware->__invoke($this->request, new Response());
     }
 
     /**
