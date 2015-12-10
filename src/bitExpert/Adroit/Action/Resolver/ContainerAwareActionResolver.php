@@ -30,30 +30,23 @@ class ContainerAwareActionResolver implements ActionResolver
      * @var \Psr\Log\LoggerInterface the logger instance.
      */
     protected $logger;
-    /**
-     * @var string The request attribute to find the target in
-     */
-    protected $targetRequestAttribute;
 
     /**
      * Creates a new {@link \bitExpert\Adroit\Action\Resolver\ContainerAwareActionResolver}.
      *
      * @param ContainerInterface $container
-     * @param string $targetRequestAttribute
      */
-    public function __construct(ContainerInterface $container, $targetRequestAttribute)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->targetRequestAttribute = $targetRequestAttribute;
         $this->logger = LoggerFactory::getLogger(__CLASS__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function resolve(ServerRequestInterface $request)
+    public function resolve($actionToken)
     {
-        $actionToken = $request->getAttribute($this->targetRequestAttribute);
         if (!$this->container->has($actionToken)) {
             $this->logger->error(
                 sprintf(

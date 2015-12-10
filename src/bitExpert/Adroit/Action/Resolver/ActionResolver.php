@@ -10,8 +10,6 @@
  */
 namespace bitExpert\Adroit\Action\Resolver;
 
-use Psr\Http\Message\ServerRequestInterface;
-
 /**
  * An action resolver will provide a {@link \bitExpert(Adriot\Action\Action} instance
  * for the given $actionToken.
@@ -21,12 +19,12 @@ use Psr\Http\Message\ServerRequestInterface;
 interface ActionResolver
 {
     /**
-     * Creates and returns an action object from the given {@link \Psr\Http\Message\ServerRequestInterface}.
+     * Creates and returns an action object using the given $actionToken.
      * If no matching {@link \bitExpert\Adroit\Action\Action} instance could be found, null will be
      * returned.
      *
-     * @param ServerRequestInterface $request
+     * @param string $actionToken
      * @return \bitExpert\Adroit\Action\Action|null
      */
-    public function resolve(ServerRequestInterface $request);
+    public function resolve($actionToken);
 }

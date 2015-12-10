@@ -16,6 +16,7 @@ use bitExpert\Adroit\Domain\DomainPayloadInterface;
 use bitExpert\Adroit\Responder\Resolver\ResponderResolver;
 use bitExpert\Adroit\Responder\Responder;
 use bitExpert\Pathfinder\Router;
+use bitExpert\Pathfinder\RoutingResult;
 use bitExpert\Slf4PsrLog\LoggerFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -71,8 +72,21 @@ class AdroitMiddleware implements MiddlewareInterface
     {
         $this->logger->debug('Handling new request...');
 
-        $request = $this->resolveActionToken($request);
-        $action = $this->resolveAction($request);
+        $result = $this->resolveRoutingResult($request);
+
+        if (!$result->hasTarget()) {
+            $message = 'No action could be determined for the current request';
+            $response->getBody()->rewind();
+            $response->getBody()->write($message);
+            $response->getBody()->rewind();
+            $response = $response->withStatus(404);
+            return $response;
+        }
+
+        $action = $this->resolveAction($result->getTarget());
+
+        // inject params determined by the router into the request
+        $request = $this->injectParams($request, $result->getParams());
 
         // execute the action
         $responseOrPayload = $action->prepareAndExecute($request, $response);
@@ -107,14 +121,28 @@ class AdroitMiddleware implements MiddlewareInterface
     }
 
     /**
-     * Resolves the actionToken from the given $request.
+     * Lets perform the router and returns a {@link \bitExpert\Pathfinder\RoutingResult} for the given $request.
      *
      * @param ServerRequestInterface $request
-     * @return ServerRequestInterface
+     * @return RoutingResult
      */
-    protected function resolveActionToken(ServerRequestInterface $request)
+    protected function resolveRoutingResult(ServerRequestInterface $request)
     {
         return $this->router->match($request);
+    }
+
+    /**
+     * Injects given params to the given request and returns a new {@link \Psr\Http\Message\ServerRequestInterface}
+     *
+     * @param ServerRequestInterface $request
+     * @param array $params
+     * @return ServerRequestInterface
+     */
+    protected function injectParams(ServerRequestInterface $request, array $params = [])
+    {
+        $params = array_merge($request->getQueryParams(), $params);
+        // setting given params as query params
+        return $request->withQueryParams($params);
     }
 
     /**
@@ -122,11 +150,11 @@ class AdroitMiddleware implements MiddlewareInterface
      * the $actionResolvers. In case no matching action instance could be found an
      * exception gets thrown.
      *
-     * @param ServerRequestInterface $request
+     * @param $actionToken
      * @return Action
      * @throws RuntimeException
      */
-    protected function resolveAction(ServerRequestInterface $request)
+    protected function resolveAction($actionToken)
     {
         $this->logger->debug('Trying to resolve action...');
 
@@ -141,7 +169,7 @@ class AdroitMiddleware implements MiddlewareInterface
                 continue;
             }
 
-            $action = $resolver->resolve($request);
+            $action = $resolver->resolve($actionToken);
             if ($action instanceof Action) {
                 // step out of the loop when an action could be found
                 // by the resolver. First resolver wins!
@@ -154,7 +182,7 @@ class AdroitMiddleware implements MiddlewareInterface
             }
         }
 
-        $message = 'An action could not be resolved from the given request!';
+        $message = 'An action could not be resolved for the given token!';
         $this->logger->error($message);
         throw new RuntimeException($message);
     }
