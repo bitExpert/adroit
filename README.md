@@ -10,7 +10,7 @@ Adroit.
 Installation
 ------------
 
-The preferred way of installation is through Composer. Simply add `bitexpert/adroit` as a dependency:
+The preferred way of installing `bitexpert/adroit` is through Composer. Simply add `bitexpert/adroit` as a dependency:
 
 ```
 composer.phar require bitexpert/adroit
