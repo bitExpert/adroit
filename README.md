@@ -90,8 +90,7 @@ Responders
 
 Responders have to return a PSR-7 response object which in will be returned by the AdroitMiddleware. Adroit ships two
 different implementations by default. The JsonResponder (\bitExpert\Adroit\Responder\JsonResponder) which will simply 
-json_encode() the DomainPayload data and the TwigResponder (\bitExpert\Adroit\Responder\TwigResponder) which will render
-a Twig template with the given DomainPayload data.
+json_encode() the DomainPayload data.
 
 Usage
 -----
