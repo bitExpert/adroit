@@ -74,7 +74,7 @@ class TwigResponder implements Responder
      * {@inheritDoc}
      * @throws RuntimeException
      */
-    public function buildResponse(DomainPayloadInterface $domainPayload, ResponseInterface $response)
+    public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response)
     {
         if (empty($this->template)) {
             throw new RuntimeException('No template set to render!');

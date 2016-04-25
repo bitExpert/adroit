@@ -11,7 +11,6 @@
 namespace bitExpert\Adroit\Responder;
 
 use bitExpert\Adroit\Domain\DomainPayload;
-use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response;
 
 /**
@@ -22,7 +21,7 @@ use Zend\Diactoros\Response;
 class HttpStatusCodeResponderUnitTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var ResponseInterface
+     * @var Response
      */
     protected $response;
 
@@ -43,7 +42,7 @@ class HttpStatusCodeResponderUnitTest extends \PHPUnit_Framework_TestCase
     {
         $responder = new HttpStatusCodeResponder(200);
         $domainPayload = new DomainPayload('test');
-        $response = $responder->buildResponse($domainPayload, $this->response);
+        $response = $responder($domainPayload, $this->response);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -57,6 +56,6 @@ class HttpStatusCodeResponderUnitTest extends \PHPUnit_Framework_TestCase
         $domainPayload = new DomainPayload('test');
         $responder = new HttpStatusCodeResponder('hello');
 
-        $responder->buildResponse($domainPayload, $this->response);
+        $responder($domainPayload, $this->response);
     }
 }

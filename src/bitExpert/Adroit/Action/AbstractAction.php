@@ -17,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 
 /**
- * Base class for all actions providing a default implementation of the prepareAndExecute()
+ * Base class for all actions providing a default implementation of the __invoke()
  * method. Child classes need only to implement the execute() method.
  *
  * @api
@@ -45,7 +45,7 @@ abstract class AbstractAction implements Action
      * {@inheritDoc}
      * @throws RuntimeException
      */
-    public function prepareAndExecute(ServerRequestInterface $request, ResponseInterface $response)
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
         $responseOrPayload = $this->execute($request, $response);
 

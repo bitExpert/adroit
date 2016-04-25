@@ -31,5 +31,5 @@ interface Responder
      * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    public function buildResponse(DomainPayloadInterface $domainPayload, ResponseInterface $response);
+    public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response);
 }

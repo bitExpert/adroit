@@ -44,7 +44,7 @@ class HttpStatusCodeResponder implements Responder
      * {@inheritDoc}
      * @throws RuntimeException
      */
-    public function buildResponse(DomainPayloadInterface $domainPayload, ResponseInterface $response)
+    public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response)
     {
         try {
             return $response->withStatus($this->statusCode);

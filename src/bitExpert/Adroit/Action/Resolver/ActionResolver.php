@@ -10,21 +10,15 @@
  */
 namespace bitExpert\Adroit\Action\Resolver;
 
+use bitExpert\Adroit\Resolver\Resolver;
+
 /**
- * An action resolver will provide a {@link \bitExpert(Adriot\Action\Action} instance
+ * An action resolver will provide a {@link \bitExpert(Adroit\Action\Action} instance
  * for the given $actionToken.
  *
  * @api
  */
-interface ActionResolver
+interface ActionResolver extends Resolver
 {
-    /**
-     * Creates and returns an action object using the given $actionToken.
-     * If no matching {@link \bitExpert\Adroit\Action\Action} instance could be found, null will be
-     * returned.
-     *
-     * @param string $actionToken
-     * @return \bitExpert\Adroit\Action\Action|null
-     */
-    public function resolve($actionToken);
+
 }

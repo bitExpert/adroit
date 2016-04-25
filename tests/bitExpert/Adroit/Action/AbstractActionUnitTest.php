@@ -33,7 +33,7 @@ class AbstractActionUnitTest extends \PHPUnit_Framework_TestCase
             ->method('execute')
             ->will($this->returnValue(new Response()));
 
-        $response = $action->prepareAndExecute(new ServerRequest(), new Response());
+        $response = $action->__invoke(new ServerRequest(), new Response());
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }
@@ -48,7 +48,7 @@ class AbstractActionUnitTest extends \PHPUnit_Framework_TestCase
             ->method('execute')
             ->will($this->returnValue(new DomainPayload('test')));
 
-        $domainPayload = $action->prepareAndExecute($this->getMock(ServerRequestInterface::class), new Response());
+        $domainPayload = $action->__invoke($this->getMock(ServerRequestInterface::class), new Response());
 
         $this->assertInstanceOf(DomainPayload::class, $domainPayload);
         $this->assertSame('test', $domainPayload->getType());
@@ -66,6 +66,6 @@ class AbstractActionUnitTest extends \PHPUnit_Framework_TestCase
             ->method('execute')
             ->will($this->returnValue(null));
 
-        $action->prepareAndExecute($this->getMock(ServerRequestInterface::class), new Response());
+        $action->__invoke($this->getMock(ServerRequestInterface::class), new Response());
     }
 }

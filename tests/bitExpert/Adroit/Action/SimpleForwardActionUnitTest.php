@@ -26,8 +26,10 @@ class SimpleForwardActionUnitTest extends \PHPUnit_Framework_TestCase
      */
     public function prepareAndExecuteAlwaysReturnsDomainPayload()
     {
-        $action = new SimpleForwardAction();
-        $domainPayload = $action->prepareAndExecute(new ServerRequest(), new Response());
+        $action = new SimpleForwardAction(
+
+        );
+        $domainPayload = $action->__invoke(new ServerRequest(), new Response());
 
         $this->assertInstanceOf(DomainPayload::class, $domainPayload);
     }
@@ -39,7 +41,7 @@ class SimpleForwardActionUnitTest extends \PHPUnit_Framework_TestCase
     {
         $action = new SimpleForwardAction();
         $action->setResponder('myResponder');
-        $domainPayload = $action->prepareAndExecute(new ServerRequest(), new Response());
+        $domainPayload = $action->__invoke(new ServerRequest(), new Response());
 
         $this->assertSame('myResponder', $domainPayload->getType());
     }

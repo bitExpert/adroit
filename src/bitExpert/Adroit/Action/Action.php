@@ -26,5 +26,5 @@ interface Action
      * @param ResponseInterface $response
      * @return DomainPayload|ResponseInterface
      */
-    public function prepareAndExecute(ServerRequestInterface $request, ResponseInterface $response);
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response);
 }

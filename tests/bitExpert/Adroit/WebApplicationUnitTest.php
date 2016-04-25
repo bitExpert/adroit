@@ -10,13 +10,12 @@
  */
 namespace bitExpert\Adroit;
 
+use bitExpert\Pathfinder\Route;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Stratigility\MiddlewareInterface;
-use Psr\Log\NullLogger;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Stream;
+use Zend\Diactoros\Response\EmitterInterface;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\WebApplication}.
@@ -44,37 +43,23 @@ class WebApplicationUnitTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-
-        $this->request = new ServerRequest();
+        $this->request = new ServerRequest([], [], '/', 'GET');
         $this->response = new Response();
-        $this->application = new WebApplication();
+        $emitter = $this->getMock(EmitterInterface::class);
+        $this->application = WebApplication::createDefault(null, [], [], $emitter);
+
+        $this->application->addRoute(
+            Route::get('/')->to(function (ServerRequestInterface $request, ResponseInterface $response) {
+                //
+            })->named('home')
+        );
     }
 
     /**
      * @test
-     * @runInSeparateProcess
-     * @requires extension xdebug
-     * @requires function xdebug_get_headers
      */
     public function sendsHeadersCorrectly()
     {
-        $app = $this->application;
-        $headersToSend = array(
-            'Content-Type' => 'application/json',
-            'Location' => 'http://someawesomedomain.com'
-        );
 
-        $response = $this->response;
-        foreach ($headersToSend as $name => $value) {
-            $response = $response->withHeader($name, $value);
-        }
-
-        $app->run($this->request, $response);
-
-        $sentHeaders = xdebug_get_headers();
-        foreach ($headersToSend as $name => $value) {
-            $headerStr = sprintf('%s: %s', $name, $value);
-            $this->assertTrue(in_array($headerStr, $sentHeaders));
-        }
     }
 }

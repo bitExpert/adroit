@@ -10,8 +10,7 @@
  */
 namespace bitExpert\Adroit\Responder\Resolver;
 
-use bitExpert\Adroit\Domain\DomainPayloadInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use bitExpert\Adroit\Resolver\Resolver;
 
 /**
  * A responder resolver will provide a {@link \bitExpert(Adriot\Action\Action} instance
@@ -19,16 +18,7 @@ use Psr\Http\Message\ServerRequestInterface;
  *
  * @api
  */
-interface ResponderResolver
+interface ResponderResolver extends Resolver
 {
-    /**
-     * Creates and returns an action object from the given $identifier. If no matching
-     * {@link \bitExpert\Adroit\Responder\Responder} instance could be found, null will
-     * be returned.
-     *
-     * @param ServerRequestInterface $request
-     * @param DomainPayloadInterface $domainPayload
-     * @return \bitExpert\Adroit\Responder\Responder|null
-     */
-    public function resolve(ServerRequestInterface $request, DomainPayloadInterface $domainPayload);
+
 }

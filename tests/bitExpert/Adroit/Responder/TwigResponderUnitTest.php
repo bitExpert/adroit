@@ -34,7 +34,7 @@ class TwigResponderUnitTest extends \PHPUnit_Framework_TestCase
      */
     protected $responder;
     /**
-     * @var ResponseInterface
+     * @var Response
      */
     protected $response;
 
@@ -75,7 +75,7 @@ class TwigResponderUnitTest extends \PHPUnit_Framework_TestCase
      */
     public function callingBuildResponseWithoutAPresetTemplateWillThrowAnException()
     {
-        $this->responder->buildResponse($this->domainPayload, $this->response);
+        $this->responder->__invoke($this->domainPayload, $this->response);
     }
 
     /**
@@ -88,7 +88,7 @@ class TwigResponderUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue('<html>'));
 
         $this->responder->setTemplate('mytemplate.twig');
-        $response = $this->responder->buildResponse($this->domainPayload, $this->response);
+        $response = $this->responder->__invoke($this->domainPayload, $this->response);
         $response->getBody()->rewind();
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
@@ -108,7 +108,8 @@ class TwigResponderUnitTest extends \PHPUnit_Framework_TestCase
 
         $this->responder->setTemplate('mytemplate.twig');
         $this->responder->setHeaders(['X-Sender' => 'PHPUnit Testcase']);
-        $response = $this->responder->buildResponse($this->domainPayload, $this->response);
+        $responder = $this->responder;
+        $response = $responder($this->domainPayload, $this->response);
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals(200, $response->getStatusCode());
@@ -127,7 +128,7 @@ class TwigResponderUnitTest extends \PHPUnit_Framework_TestCase
 
         $this->responder->setTemplate('mytemplate.twig');
         $this->responder->setHeaders(['Content-Type' => 'my/type']);
-        $response = $this->responder->buildResponse($this->domainPayload, $this->response);
+        $response = $this->responder->__invoke($this->domainPayload, $this->response);
 
         $this->assertEquals(['text/html'], $response->getHeader('Content-Type'));
     }

@@ -26,7 +26,7 @@ class JsonResponderUnitTest extends \PHPUnit_Framework_TestCase
      */
     protected $responder;
     /**
-     * @var ResponseInterface
+     * @var Response
      */
     protected $response;
 
@@ -48,7 +48,8 @@ class JsonResponderUnitTest extends \PHPUnit_Framework_TestCase
     {
         $model = ['1' => 'demo', '2a' => 'test'];
         $domainPayload = new DomainPayload('test', $model);
-        $response = $this->responder->buildResponse($domainPayload, $this->response);
+        $responder = $this->responder;
+        $response = $responder($domainPayload, $this->response);
         $response->getBody()->rewind();
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
@@ -64,7 +65,8 @@ class JsonResponderUnitTest extends \PHPUnit_Framework_TestCase
     {
         $domainPayload = new DomainPayload('test');
         $this->responder->setHeaders(['X-Sender' => 'PHPUnit Testcase']);
-        $response = $this->responder->buildResponse($domainPayload, $this->response);
+        $responder = $this->responder;
+        $response = $responder($domainPayload, $this->response);
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals(200, $response->getStatusCode());
@@ -79,7 +81,8 @@ class JsonResponderUnitTest extends \PHPUnit_Framework_TestCase
     {
         $domainPayload = new DomainPayload('test');
         $this->responder->setHeaders(['Content-Type' => 'my/type']);
-        $response = $this->responder->buildResponse($domainPayload, $this->response);
+        $responder = $this->responder;
+        $response = $responder($domainPayload, $this->response);
 
         $this->assertEquals(['application/json'], $response->getHeader('Content-Type'));
     }

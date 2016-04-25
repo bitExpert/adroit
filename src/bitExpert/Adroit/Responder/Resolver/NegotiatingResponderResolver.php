@@ -11,7 +11,6 @@
 namespace bitExpert\Adroit\Responder\Resolver;
 
 use bitExpert\Adroit\Accept\ContentNegotiationManager;
-use bitExpert\Adroit\Domain\DomainPayloadInterface;
 use bitExpert\Adroit\Responder\HttpStatusCodeResponder;
 use bitExpert\Adroit\Responder\Responder;
 use Psr\Http\Message\ServerRequestInterface;
@@ -51,7 +50,7 @@ class NegotiatingResponderResolver implements ResponderResolver
     /**
      * {@inheritDoc}
      */
-    public function resolve(ServerRequestInterface $request, DomainPayloadInterface $domainPayload)
+    public function resolve(ServerRequestInterface $request, $identifier)
     {
         $type = $this->negotiationManager->getBestMatch($request, array_keys($this->responderResolver));
         if (null !== $type) {
@@ -68,7 +67,7 @@ class NegotiatingResponderResolver implements ResponderResolver
                     continue;
                 }
 
-                $responder = $resolver->resolve($request, $domainPayload);
+                $responder = $resolver->resolve($request, $identifier);
                 if ($responder instanceof Responder) {
                     // step out of the loop when a responder could be found
                     // by the resolvers. First resolvers wins!
