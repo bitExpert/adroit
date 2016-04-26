@@ -1,7 +1,8 @@
 {
   "name": "bitexpert/adroit",
   "description": "PSR-7 Middleware based on the ADR (Action Domain Responder) paradigm.",
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "license": "Apache-2.0",
   "authors": [
     {
@@ -22,11 +23,12 @@
     "twig/twig": "v1.23.1",
     "willdurand/negotiation": "v2.0.1",
     "bitexpert/slf4psrlog": "^0.1.0",
-    "bitexpert/pathfinder": "^0.3.0"
+    "bitexpert/pathfinder": "dev-master"
   },
   "require-dev": {
     "phpunit/php-code-coverage": "^2.1.0",
     "phpunit/phpunit": "^4.8",
+    "phake/phake": "2.*",
     "squizlabs/php_codesniffer": "^2.3",
     "phpdocumentor/phpdocumentor": "^2.8",
     "monolog/monolog": "^1.14.0",
@@ -43,5 +45,11 @@
     "psr-4": {
       "bitExpert\\Adroit\\": "tests/bitExpert/Adroit"
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/bitexpert/pathfinder"
+    }
+  ]
 }

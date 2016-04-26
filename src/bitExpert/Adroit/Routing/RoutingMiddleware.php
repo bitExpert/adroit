@@ -10,13 +10,15 @@
  */
 namespace bitExpert\Adroit\Routing;
 
+use bitExpert\Adroit\Middleware;
+
 /**
  * A routing middleware uses a router to determine a routing result which will be stored inside the
  * routingResultAttribute for further usage
  *
  * @package bitExpert\Adroit\Routing
  */
-interface RoutingMiddleware
+interface RoutingMiddleware extends Middleware
 {
     /**
      * @return string
@@ -24,7 +26,7 @@ interface RoutingMiddleware
     public function getRoutingResultAttribute();
 
     /**
-     * @return \bitExpert\Pathfinder\Router
+     * @return Router
      */
     public function getRouter();
 }

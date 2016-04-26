@@ -9,6 +9,7 @@
  * file that was distributed with this source code.
  */
 namespace bitExpert\Adroit\Action;
+use bitExpert\Adroit\Middleware;
 
 /**
  * An action middleware fetches the routing attribute determines which action to use for the defined target
@@ -16,7 +17,7 @@ namespace bitExpert\Adroit\Action;
  *
  * @package bitExpert\Adroit\Action
  */
-interface ActionMiddleware
+interface ActionMiddleware extends Middleware
 {
     /**
      * Returns the attribute the domain payload will be stored in after having executed the action

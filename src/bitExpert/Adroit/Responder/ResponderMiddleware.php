@@ -10,7 +10,9 @@
  */
 namespace bitExpert\Adroit\Responder;
 
-interface ResponderMiddleware
+use bitExpert\Adroit\Middleware;
+
+interface ResponderMiddleware extends Middleware
 {
 
 }

@@ -66,7 +66,7 @@ class WebApplication extends MiddlewarePipe
     /**
      * @var callable
      */
-    protected $targetMiddleware;
+    protected $actionMiddleware;
     /**
      * @var callable
      */
@@ -80,13 +80,13 @@ class WebApplication extends MiddlewarePipe
      * Creates a new {\bitExpert\Adroit\WebApplication}.
      *
      * @param RoutingMiddleware $routingMiddleware
-     * @param ActionMiddleware $targetMiddleware
+     * @param ActionMiddleware $actionMiddleware
      * @param ResponderMiddleware $responderMiddleware
      * @param EmitterInterface $emitter
      */
     public function __construct(
         RoutingMiddleware $routingMiddleware,
-        ActionMiddleware $targetMiddleware,
+        ActionMiddleware $actionMiddleware,
         ResponderMiddleware $responderMiddleware,
         EmitterInterface $emitter = null)
     {
@@ -97,7 +97,7 @@ class WebApplication extends MiddlewarePipe
         $this->initialized = false;
 
         $this->routingMiddleware = $routingMiddleware;
-        $this->actionMiddleware = $targetMiddleware;
+        $this->actionMiddleware = $actionMiddleware;
         $this->responderMiddleware = $responderMiddleware;
 
         if (null === $emitter) {
@@ -239,14 +239,14 @@ class WebApplication extends MiddlewarePipe
     /**
      * Creates a route using given params
      *
-     * @param string $path
      * @param mixed $methods
      * @param string $name
+     * @param string $path
      * @param mixed $target
      * @param \bitExpert\Pathfinder\Matcher\Matcher[] $matchers
      * @return Route
      */
-    protected function createRoute($path, $methods, $name, $target, array $matchers = [])
+    protected function createRoute($methods, $name, $path, $target, array $matchers = [])
     {
         $routeClass = $this->defaultRouteClass ? $this->defaultRouteClass : Route::class;
         $route = forward_static_call([$routeClass, 'create'], $methods, $path, $target);
@@ -270,7 +270,7 @@ class WebApplication extends MiddlewarePipe
      */
     public function get($name, $path, $target, array $matchers = [])
     {
-        $route = $this->createRoute($path, 'GET', $name, $target, $matchers);
+        $route = $this->createRoute('GET', $name, $path, $target, $matchers);
         $this->addRoute($route);
         return $this;
     }
@@ -286,7 +286,7 @@ class WebApplication extends MiddlewarePipe
      */
     public function post($name, $path, $target, array $matchers = [])
     {
-        $route = $this->createRoute($path, 'POST', $name, $target, $matchers);
+        $route = $this->createRoute('POST', $name, $path, $target, $matchers);
         $this->addRoute($route);
         return $this;
     }
@@ -302,7 +302,7 @@ class WebApplication extends MiddlewarePipe
      */
     public function put($name, $path, $target, array $matchers = [])
     {
-        $route = $this->createRoute($path, 'PUT', $name, $target, $matchers);
+        $route = $this->createRoute('PUT', $name, $path, $target, $matchers);
         $this->addRoute($route);
         return $this;
     }
@@ -316,9 +316,9 @@ class WebApplication extends MiddlewarePipe
      * @param $matchers
      * @return WebApplication
      */
-    public function delete($path, $target, $name, array $matchers = [])
+    public function delete($name, $path, $target, array $matchers = [])
     {
-        $route = $this->createRoute($path, 'DELETE', $name, $target, $matchers);
+        $route = $this->createRoute('DELETE', $name, $path, $target, $matchers);
         $this->addRoute($route);
         return $this;
     }
@@ -332,9 +332,25 @@ class WebApplication extends MiddlewarePipe
      * @param $matchers
      * @return WebApplication
      */
-    public function options($path, $target, $name, array $matchers = [])
+    public function options($name, $path, $target, array $matchers = [])
     {
-        $route = $this->createRoute($path, 'OPTIONS', $name, $target, $matchers);
+        $route = $this->createRoute('OPTIONS', $name, $path, $target, $matchers);
+        $this->addRoute($route);
+        return $this;
+    }
+
+    /**
+     * Adds a PATCH route
+     *
+     * @param $name
+     * @param $path
+     * @param $target
+     * @param $matchers
+     * @return WebApplication
+     */
+    public function patch($name, $path, $target, array $matchers = [])
+    {
+        $route = $this->createRoute('PATCH', $name, $path, $target, $matchers);
         $this->addRoute($route);
         return $this;
     }
@@ -355,23 +371,23 @@ class WebApplication extends MiddlewarePipe
      * Creates a WebApplication instance using the default configuration
      *
      * @param Router|null $router
-     * @param array $targetResolvers
+     * @param array $actionResolvers
      * @param array $responderResolvers
      * @param EmitterInterface|null $emitter
      * @return WebApplication
      */
     public static function createDefault(
         Router $router = null,
-        $targetResolvers = [],
+        $actionResolvers = [],
         $responderResolvers = [],
         EmitterInterface $emitter = null
     ) {
         $router = ($router !== null) ? $router : new Psr7Router('');
-        $targetResolvers = (count($targetResolvers) > 0) ? $targetResolvers : [new DirectActionResolver()];
+        $actionResolvers = (count($actionResolvers) > 0) ? $actionResolvers : [new DirectActionResolver()];
         $routingMiddleware = new PathfinderRoutingMiddleware($router, RoutingResult::class);
-        $targetMiddleware = new ActionResolverMiddleware($targetResolvers, RoutingResult::class, DomainPayload::class);
+        $actionMiddleware = new ActionResolverMiddleware($actionResolvers, RoutingResult::class, DomainPayload::class);
         $responderMiddleware = new ResponderResolverMiddleware($responderResolvers, DomainPayload::class);
 
-        return new self($routingMiddleware, $targetMiddleware, $responderMiddleware, $emitter);
+        return new self($routingMiddleware, $actionMiddleware, $responderMiddleware, $emitter);
     }
 }
