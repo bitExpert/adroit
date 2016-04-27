@@ -39,7 +39,7 @@ class ActionResolverMiddleware extends CallableResolverMiddleware implements Act
     {
         $actionIdentifier = $this->getActionIdentifier($request);
 
-        if (empty($actionIdentifier)) {
+        if (null === $actionIdentifier) {
             throw new ResolveException('Could not determine action for request');
         }
 
@@ -94,6 +94,7 @@ class ActionResolverMiddleware extends CallableResolverMiddleware implements Act
      * Returns the action identifier
      *
      * @param ServerRequestInterface $request
+     * @throws \RuntimeException
      * @return mixed
      */
     protected function getActionIdentifier(ServerRequestInterface $request)
@@ -101,27 +102,24 @@ class ActionResolverMiddleware extends CallableResolverMiddleware implements Act
         $routingResult = $this->getRoutingResult($request);
 
         if ($routingResult->failed()) {
+            $this->logger->warning(sprintf(
+                'Routing result has been marked as failed. Returning null'
+            ));
+
             return null;
         }
 
         $route = $routingResult->getRoute();
 
-        if ($route) {
-            return $route->getTarget();
-        }
-
-        $this->logger->warning(sprintf(
-            'Routing result did not contain a route'
-        ));
-
-        return null;
+        return $route->getTarget();
     }
 
     /**
      * Returns used params
      *
      * @param ServerRequestInterface $request
-     * @return array
+     * @throws \RuntimeException
+     * @return RoutingResult
      */
     protected function getParams(ServerRequestInterface $request)
     {
@@ -137,7 +135,7 @@ class ActionResolverMiddleware extends CallableResolverMiddleware implements Act
     {
         $routingResult = $request->getAttribute($this->routingResultAttribute);
 
-        if (empty($routingResult)) {
+        if (null === $routingResult) {
             throw new ResolveException(sprintf(
                 'No routing result found in request attribute "%s"',
                 $this->routingResultAttribute

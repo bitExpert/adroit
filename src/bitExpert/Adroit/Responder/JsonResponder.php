@@ -11,9 +11,7 @@
 namespace bitExpert\Adroit\Responder;
 
 use bitExpert\Adroit\Domain\DomainPayloadInterface;
-use Exception;
 use Psr\Http\Message\ResponseInterface;
-use RuntimeException;
 
 /**
  * Responder to convert the given model into JSON format.
@@ -39,22 +37,18 @@ class JsonResponder implements Responder
 
     /**
      * {@inheritDoc}
-     * @throws RuntimeException
+     * @throws \InvalidArgumentException
      */
     public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response)
     {
-        try {
-            $response->getBody()->rewind();
-            $response->getBody()->write(json_encode($domainPayload->getValues()));
+        $response->getBody()->rewind();
+        $response->getBody()->write(json_encode($domainPayload->getValues()));
 
-            $headers = array_merge($this->headers, ['Content-Type' => 'application/json']);
-            foreach ($headers as $header => $value) {
-                $response = $response->withHeader($header, $value);
-            }
-
-            return $response->withStatus(200);
-        } catch (Exception $e) {
-            throw new RuntimeException('Response object could not be instantiated! ' . $e->getMessage());
+        $headers = array_merge($this->headers, ['Content-Type' => 'application/json']);
+        foreach ($headers as $header => $value) {
+            $response = $response->withHeader($header, $value);
         }
+
+        return $response->withStatus(200);
     }
 }

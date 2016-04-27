@@ -26,7 +26,7 @@ interface RoutingMiddleware extends Middleware
     public function getRoutingResultAttribute();
 
     /**
-     * @return Router
+     * @return \bitExpert\Pathfinder\Router
      */
     public function getRouter();
 }

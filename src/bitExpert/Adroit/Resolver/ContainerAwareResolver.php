@@ -68,6 +68,6 @@ abstract class ContainerAwareResolver implements Resolver
      */
     protected function isValidResult($resolved)
     {
-        return !is_null($resolved);
+        return (null !== $resolved);
     }
 }

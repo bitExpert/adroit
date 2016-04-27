@@ -11,6 +11,7 @@
 namespace bitExpert\Adroit\Responder\Resolver;
 
 use bitExpert\Adroit\Resolver\CallableResolverMiddleware;
+use bitExpert\Adroit\Resolver\ResolveException;
 use bitExpert\Adroit\Responder\ResponderMiddleware;
 use bitExpert\Adroit\Resolver\Resolver;
 use Psr\Http\Message\ServerRequestInterface;
@@ -29,6 +30,7 @@ class ResponderResolverMiddleware extends CallableResolverMiddleware implements 
 
     /**
      * @inheritdoc
+     * @throws ResolveException
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
@@ -37,12 +39,23 @@ class ResponderResolverMiddleware extends CallableResolverMiddleware implements 
         // if the return value is a response instance, directly return it
         if ($domainPayload instanceof ResponseInterface) {
             $this->logger->debug('Received response. Returning directly.');
-            return $domainPayload;
+            $response = $domainPayload;
+
+            if ($next) {
+                $response = $next($request, $response);
+            }
+
+            return $response;
         }
 
         $responder = $this->resolve($request, $domainPayload->getType());
+        $response = $responder($domainPayload, $response);
 
-        return $responder($domainPayload, $response);
+        if ($next) {
+            $response = $next($request, $response);
+        }
+
+        return $response;
     }
 
     /**

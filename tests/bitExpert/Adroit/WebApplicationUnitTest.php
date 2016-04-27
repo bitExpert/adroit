@@ -10,6 +10,8 @@
  */
 namespace bitExpert\Adroit;
 
+use bitExpert\Adroit\Helper\DeeplyInheritedRoute;
+use bitExpert\Adroit\Helper\InheritedRoute;
 use bitExpert\Pathfinder\Matcher\NumericMatcher;
 use bitExpert\Pathfinder\Route;
 use bitExpert\Pathfinder\Router;
@@ -220,6 +222,63 @@ class WebApplicationUnitTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function beforeEmitterMiddlewareWillBeCalledBeforeEmitter()
+    {
+        $expectedOrder = [
+            'beforeEmitter',
+            'emitter'
+        ];
+
+        $order = [];
+
+        $routingMiddleware = $this->getMockBuilder(RoutingMiddleware::class, ['__invoke'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $routingMiddleware->expects($this->any())
+            ->method('__invoke')
+            ->will($this->returnCallback($this->createTestMiddleware()));
+
+
+        $actionMiddleware = $this->getMockBuilder(ActionMiddleware::class, ['__invoke'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $actionMiddleware->expects($this->any())
+            ->method('__invoke')
+            ->will($this->returnCallback($this->createTestMiddleware()));
+
+        $responderMiddleware = $this->getMockBuilder(ResponderMiddleware::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $responderMiddleware->expects($this->any())
+            ->method('__invoke')
+            ->will($this->returnCallback($this->createTestMiddleware()));
+
+        $beforeEmitterMiddleware = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'beforeEmitter';
+        });
+
+        $emitter = $this->getMock(EmitterInterface::class, ['emit']);
+        $emitter->expects($this->once())
+            ->method('emit')
+            ->will($this->returnCallback(function () use (&$order) {
+                $order[] = 'emitter';
+            }));
+
+        $app = new WebApplication($routingMiddleware, $actionMiddleware, $responderMiddleware, $emitter);
+
+        $app->beforeEmitter($beforeEmitterMiddleware);
+
+        $app->run($this->request, $this->response);
+
+        $this->assertEquals($order, $expectedOrder);
+    }
+
+    /**
+     * @test
+     */
     public function getProducesAndRegistersARoute()
     {
         $this->routeCreationTestFunction('get');
@@ -263,6 +322,81 @@ class WebApplicationUnitTest extends \PHPUnit_Framework_TestCase
     public function patchProducesAndRegistersARoute()
     {
         $this->routeCreationTestFunction('patch');
+    }
+
+    /**
+     * @test
+     * @expectedException \InvalidArgumentException
+     */
+    public function throwsExceptionIfDefaultRouteClassDoesNotInheritRoute()
+    {
+        $app = WebApplication::createDefault();
+        $app->setDefaultRouteClass(\stdClass::class);
+    }
+
+    /**
+     * @test
+     */
+    public function acceptsRouteAsDefaultRouteClass()
+    {
+        $thrown = false;
+        try {
+            $app = WebApplication::createDefault();
+            $app->setDefaultRouteClass(Route::class);
+        } catch (\InvalidArgumentException $e) {
+            $thrown = true;
+        }
+
+        $this->assertFalse($thrown);
+    }
+
+    /**
+     * @test
+     */
+    public function acceptsInheritedRouteClassAsDefaultRouteClass()
+    {
+        $thrown = false;
+        try {
+            $app = WebApplication::createDefault();
+            $app->setDefaultRouteClass(InheritedRoute::class);
+        } catch (\InvalidArgumentException $e) {
+            $thrown = true;
+        }
+
+        $this->assertFalse($thrown);
+    }
+
+    /**
+     * @test
+     */
+    public function acceptsDeeplyInheritedRouteClassAsDefaultRouteClass()
+    {
+        $thrown = false;
+        try {
+            $app = WebApplication::createDefault();
+            $app->setDefaultRouteClass(DeeplyInheritedRoute::class);
+        } catch (\InvalidArgumentException $e) {
+            $thrown = true;
+        }
+
+        $this->assertFalse($thrown);
+    }
+
+    public function usesModifiedDefaultRouteClass()
+    {
+        $name = 'user';
+        $path = '/user/[:id]';
+        $target = 'userAction';
+        $matchers = [
+            'id' => [$this->getMock(NumericMatcher::class)]
+        ];
+
+        $defaultRouteClass = DeeplyInheritedTestRoute::class;
+
+        $router = $this->createRouteCreationTestRouter(strtoupper('GET'), $name, $path, $target, $matchers, $defaultRouteClass);
+        $app = WebApplication::createDefault($router);
+        $app->setDefaultRouteClass(DeeplyInheritedTestRoute::class);
+        $app->get($name, $path, $target, $matchers);
     }
 
     /**
@@ -317,15 +451,19 @@ class WebApplicationUnitTest extends \PHPUnit_Framework_TestCase
      * @param $path
      * @param $target
      * @param $matchers
+     * @param $class
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function createRouteCreationTestRouter($method, $name, $path, $target, $matchers)
+    protected function createRouteCreationTestRouter($method, $name, $path, $target, $matchers, $class = null)
     {
         $router = $this->getMockForAbstractClass(Router::class, ['addRoute']);
         $self = $this;
         $router->expects($this->once())
             ->method('addRoute')
-            ->will($this->returnCallback(function (Route $route) use ($self, $method, $name, $path, $target, $matchers) {
+            ->will($this->returnCallback(function (Route $route) use ($self, $method, $name, $path, $target, $matchers, $class) {
+                if ($class !== null) {
+                    $this->assertEquals(get_class($route), $class);
+                }
                 $routeMethods = $route->getMethods();
                 $self->assertContains($method, $routeMethods);
                 $routePath = $route->getPath();

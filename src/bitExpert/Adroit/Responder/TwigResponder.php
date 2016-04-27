@@ -11,9 +11,7 @@
 namespace bitExpert\Adroit\Responder;
 
 use bitExpert\Adroit\Domain\DomainPayloadInterface;
-use Exception;
 use Psr\Http\Message\ResponseInterface;
-use RuntimeException;
 
 /**
  * Responder to convert a given Twig template into an response object.
@@ -72,26 +70,25 @@ class TwigResponder implements Responder
 
     /**
      * {@inheritDoc}
-     * @throws RuntimeException
+     * @throws \InvalidArgumentException
+     * @throws \Twig_Error_Syntax
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Runtime
      */
     public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response)
     {
-        if (empty($this->template)) {
-            throw new RuntimeException('No template set to render!');
+        if (null === $this->template) {
+            throw new \RuntimeException('No template set to render!');
         }
 
-        try {
-            $response->getBody()->rewind();
-            $response->getBody()->write($this->twig->render($this->template, $domainPayload->getValues()));
+        $response->getBody()->rewind();
+        $response->getBody()->write($this->twig->render($this->template, $domainPayload->getValues()));
 
-            $headers = array_merge($this->headers, ['Content-Type' => 'text/html']);
-            foreach ($headers as $header => $value) {
-                $response = $response->withHeader($header, $value);
-            }
-
-            return $response->withStatus(200);
-        } catch (Exception $e) {
-            throw new RuntimeException('Response object could not be instantiated! ' . $e->getMessage());
+        $headers = array_merge($this->headers, ['Content-Type' => 'text/html']);
+        foreach ($headers as $header => $value) {
+            $response = $response->withHeader($header, $value);
         }
+
+        return $response->withStatus(200);
     }
 }

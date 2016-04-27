@@ -67,9 +67,10 @@ class DomainPayloadUnitTest extends \PHPUnit_Framework_TestCase
     public function modifiedSingleAttributeWillBeReturnedCorrectly()
     {
         $domainPayload = new DomainPayload('test', ['a' => '1', 'b' => 2]);
-        $domainPayload = $domainPayload->withValue('b', 3);
+        $valueDomainPayload = $domainPayload->withValue('b', 3);
 
-        $this->assertEquals(3, $domainPayload->getValue('b'));
+        $this->assertEquals(3, $valueDomainPayload->getValue('b'));
+        $this->assertNotSame($domainPayload, $valueDomainPayload);
     }
 
     /**
@@ -78,9 +79,23 @@ class DomainPayloadUnitTest extends \PHPUnit_Framework_TestCase
     public function modifiedAttributeCollectionWillBeReturnedCorrectly()
     {
         $domainPayload = new DomainPayload('test', ['a' => '1', 'b' => 2]);
-        $domainPayload = $domainPayload->withValues(['b' => 4, 'c' => 'd']);
+        $valuesDomainPayload = $domainPayload->withValues(['b' => 4, 'c' => 'd']);
 
-        $this->assertEquals(4, $domainPayload->getValue('b'));
-        $this->assertEquals('d', $domainPayload->getValue('c'));
+        $this->assertEquals(4, $valuesDomainPayload->getValue('b'));
+        $this->assertEquals('d', $valuesDomainPayload->getValue('c'));
+        $this->assertNotSame($domainPayload, $valuesDomainPayload);
+    }
+
+    /**
+     * @test
+     */
+    public function setStatusReturnsNewInstanceWithStatus()
+    {
+        $status = 1000;
+        $payload = new DomainPayload('test', []);
+        $statusPayload = $payload->withStatus($status);
+
+        $this->assertEquals($status, $statusPayload->getStatus());
+        $this->assertNotSame($payload, $statusPayload);
     }
 }

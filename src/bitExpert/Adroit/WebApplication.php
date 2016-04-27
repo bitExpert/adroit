@@ -52,9 +52,9 @@ class WebApplication extends MiddlewarePipe
      */
     protected $beforeResponderMiddlewares;
     /**
-     * @var bool
+     * @var callable[]
      */
-    protected $initialized;
+    protected $beforeEmitterMiddlewares;
     /**
      * @var callable
      */
@@ -94,7 +94,6 @@ class WebApplication extends MiddlewarePipe
 
         $this->defaultRouteClass = null;
         $this->errorHandler = null;
-        $this->initialized = false;
 
         $this->routingMiddleware = $routingMiddleware;
         $this->actionMiddleware = $actionMiddleware;
@@ -109,6 +108,7 @@ class WebApplication extends MiddlewarePipe
         $this->beforeRoutingMiddlewares = [];
         $this->beforeActionMiddlewares = [];
         $this->beforeResponderMiddlewares = [];
+        $this->beforeEmitterMiddlewares = [];
     }
 
     /**
@@ -164,6 +164,19 @@ class WebApplication extends MiddlewarePipe
     }
 
     /**
+     * Adds the given middleware to the pipe after the responder middleware and before the emitter is called
+     * (chainable)
+     *
+     * @param callable $middleware
+     * @return $this
+     */
+    public function beforeEmitter(callable $middleware)
+    {
+        $this->beforeEmitterMiddlewares[] = $middleware;
+        return $this;
+    }
+
+    /**
      * Runs the application by invoking itself with the request and response, and emitting the returned response.
      *
      * @param ServerRequestInterface $request
@@ -193,18 +206,13 @@ class WebApplication extends MiddlewarePipe
      */
     protected function initialize()
     {
-        if ($this->initialized) {
-            return;
-        }
-
         $this->pipeAll($this->beforeRoutingMiddlewares);
         $this->pipe($this->routingMiddleware);
         $this->pipeAll($this->beforeActionMiddlewares);
         $this->pipe($this->actionMiddleware);
         $this->pipeAll($this->beforeResponderMiddlewares);
         $this->pipe($this->responderMiddleware);
-
-        $this->initialized = true;
+        $this->pipeAll($this->beforeEmitterMiddlewares);
     }
 
     /**
@@ -212,23 +220,26 @@ class WebApplication extends MiddlewarePipe
      * route creation
      *
      * @param $defaultRouteClass
-     * @throws \ConfigurationException
+     * @throws \InvalidArgumentException
      */
     public function setDefaultRouteClass($defaultRouteClass)
     {
         if ($defaultRouteClass === Route::class) {
             $this->defaultRouteClass = $defaultRouteClass;
         } else {
-            while ($parent = get_parent_class($defaultRouteClass)) {
+            $routeClass = $defaultRouteClass;
+            while ($parent = get_parent_class($routeClass)) {
                 if ($parent === Route::class) {
                     $this->defaultRouteClass = $defaultRouteClass;
                     break;
+                } else {
+                    $routeClass = $parent;
                 }
             }
 
             if ($this->defaultRouteClass !== $defaultRouteClass) {
-                throw new \RuntimeException(sprintf(
-                    'You tried to set %s as default route class which does not inherit %s',
+                throw new \InvalidArgumentException(sprintf(
+                    'You tried to set "%s" as default route class which does not inherit "%s"',
                     $defaultRouteClass,
                     Route::class
                 ));
@@ -248,7 +259,7 @@ class WebApplication extends MiddlewarePipe
      */
     protected function createRoute($methods, $name, $path, $target, array $matchers = [])
     {
-        $routeClass = $this->defaultRouteClass ? $this->defaultRouteClass : Route::class;
+        $routeClass = $this->defaultRouteClass ?: Route::class;
         $route = forward_static_call([$routeClass, 'create'], $methods, $path, $target);
         $route = $route->named($name);
 
@@ -359,6 +370,7 @@ class WebApplication extends MiddlewarePipe
      * Adds given route to router
      *
      * @param Route $route
+     * @throws \InvalidArgumentException
      * @return WebApplication
      */
     public function addRoute(Route $route)
@@ -371,8 +383,8 @@ class WebApplication extends MiddlewarePipe
      * Creates a WebApplication instance using the default configuration
      *
      * @param Router|null $router
-     * @param array $actionResolvers
-     * @param array $responderResolvers
+     * @param ActionResolver[] | ActionResolver $actionResolvers
+     * @param ResponderResolver[] | ResponderResolver $responderResolvers
      * @param EmitterInterface|null $emitter
      * @return WebApplication
      */

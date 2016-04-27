@@ -55,7 +55,7 @@ class NegotiatingResponderResolver implements ResponderResolver
         $type = $this->negotiationManager->getBestMatch($request, array_keys($this->responderResolver));
         if (null !== $type) {
             $resolvers = [];
-            if (isset($this->responderResolver[$type])) {
+            if (array_key_exists($type, $this->responderResolver)) {
                 $resolvers = $this->responderResolver[$type];
                 if (!is_array($resolvers)) {
                     $resolvers = [$resolvers];

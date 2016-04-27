@@ -11,13 +11,17 @@
 namespace bitExpert\Adroit\Responder\Resolver;
 
 use bitExpert\Adroit\Domain\DomainPayload;
+use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware}.
  *
- * @covers \bitExpert\Adroit\Action\Resolver\ResponderResolverMiddleware
+ * @covers \bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware
+ * @covers \bitExpert\Adroit\Resolver\AbstractResolverMiddleware
+ * @covers \bitExpert\Adroit\Resolver\CallableResolverMiddleware
  */
 class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 {
@@ -120,5 +124,65 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $request = new ServerRequest();
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
         $this->middleware->__invoke($request, new Response());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsDomainPayloadDirectlyIfItIsAResponse()
+    {
+        foreach ($this->resolvers as $resolver) {
+            $resolver->expects($this->never())
+                ->method('resolve');
+        }
+
+        $request = new ServerRequest();
+        $givenResponse = $this->getMockForAbstractClass(ResponseInterface::class);
+        $request = $request->withAttribute(self::$domainPayloadAttribute, $givenResponse);
+        $response = $this->middleware->__invoke($request, new Response());
+        $this->assertSame($givenResponse, $response);
+    }
+
+    /**
+     * @test
+     */
+    public function callsNextMiddlewareIfPresentAndDomainPayloadIsResponse()
+    {
+        $called = false;
+
+        $next = function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) use (&$called) {
+            $called = true;
+        };
+
+        $request = new ServerRequest();
+        $givenResponse = $this->getMockForAbstractClass(ResponseInterface::class);
+        $request = $request->withAttribute(self::$domainPayloadAttribute, $givenResponse);
+        $this->middleware->__invoke($request, new Response(), $next);
+        $this->assertTrue($called);
+    }
+
+    /**
+     * @test
+     */
+    public function callsNextMiddlewareIfPresentAndDomainPayloadIsDomainPayload()
+    {
+        $called = false;
+
+        $next = function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) use (&$called) {
+            $called = true;
+        };
+
+        $request = new ServerRequest();
+        $payload = new DomainPayload('test');
+        $responder = function (DomainPayload $payload, ResponseInterface $response) {
+            return $response;
+        };
+        $this->resolvers[0]->expects($this->once())
+            ->method('resolve')
+            ->will($this->returnValue($responder));
+
+        $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
+        $this->middleware->__invoke($request, new Response(), $next);
+        $this->assertTrue($called);
     }
 }

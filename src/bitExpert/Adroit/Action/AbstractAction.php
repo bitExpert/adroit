@@ -11,7 +11,6 @@
 namespace bitExpert\Adroit\Action;
 
 use bitExpert\Adroit\Domain\DomainPayload;
-use bitExpert\Slf4PsrLog\LoggerFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
@@ -24,23 +23,6 @@ use RuntimeException;
  */
 abstract class AbstractAction implements Action
 {
-    /**
-     * @var \Psr\Log\LoggerInterface the logger instance.
-     */
-    private $logger = null;
-
-    /**
-     * Returns a {@link \Psr\Log\LoggerInterface} logger implementation.
-     */
-    public function getLogger()
-    {
-        if (null === $this->logger) {
-            $this->logger = LoggerFactory::getLogger(__CLASS__);
-        }
-
-        return $this->logger;
-    }
-
     /**
      * {@inheritDoc}
      * @throws RuntimeException

@@ -23,6 +23,7 @@ abstract class AbstractResolverMiddleware
 
     /**
      * @param Resolver[] | Resolver $resolvers
+     * @throws \InvalidArgumentException
      */
     public function __construct($resolvers)
     {
@@ -32,9 +33,10 @@ abstract class AbstractResolverMiddleware
     }
 
     /**
-     * Internal setter for resolvers which validates each resolver
+     * Internal resolver setter which validates the resolvers
      *
      * @param $resolvers
+     * @throws \InvalidArgumentException
      */
     private function setResolvers($resolvers)
     {
@@ -66,10 +68,7 @@ abstract class AbstractResolverMiddleware
      * @param Resolver $resolver
      * @return bool
      */
-    protected function isValidResolver(Resolver $resolver)
-    {
-        return true;
-    }
+    abstract protected function isValidResolver(Resolver $resolver);
 
     /**
      * Returns whether the resolved is valid or not
@@ -77,10 +76,7 @@ abstract class AbstractResolverMiddleware
      * @param $result
      * @return bool
      */
-    protected function isValidResult($result)
-    {
-        return !is_null($result);
-    }
+    abstract protected function isValidResult($result);
 
     /**
      * @param ServerRequestInterface $request

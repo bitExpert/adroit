@@ -47,13 +47,9 @@ class DomainPayload implements DomainPayloadInterface
     /**
      * {@inheritdoc}
      */
-    public function getValue($key = null, $default = null)
+    public function getValue($key, $default = null)
     {
-        if (null === $key) {
-            return $this->data;
-        }
-
-        return (isset($this->data[$key])) ? $this->data[$key] : $default;
+        return array_key_exists($key, $this->data) ? $this->data[$key] : $default;
     }
 
     /**
@@ -93,7 +89,7 @@ class DomainPayload implements DomainPayloadInterface
      */
     public function withStatus($status)
     {
-        $new = clone($this);
+        $new = clone $this;
 
         $new->status = $status;
         return $new;

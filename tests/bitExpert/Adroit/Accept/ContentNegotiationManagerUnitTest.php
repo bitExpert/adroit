@@ -76,4 +76,14 @@ class ContentNegotiationManagerUnitTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull($bestMatch);
     }
+
+    /**
+     * @test
+     */
+    public function willReturnNullIfAcceptHeaderIsNotPresent()
+    {
+        $bestMatch = $this->manager->getBestMatch($this->request);
+
+        $this->assertNull($bestMatch);
+    }
 }
