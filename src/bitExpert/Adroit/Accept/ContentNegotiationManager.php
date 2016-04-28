@@ -19,7 +19,7 @@ use Psr\Http\Message\MessageInterface;
  *
  * @api
  */
-class ContentNegotiationManager
+class ContentNegotiationManager implements ContentNegotiationService
 {
     /**
      * @var Negotiator
@@ -37,13 +37,7 @@ class ContentNegotiationManager
     }
 
     /**
-     * Returns the "best match" of the given $priorities. Will return null in case
-     * no match could be identified or a string containing the best matching Accept
-     * header.
-     *
-     * @param MessageInterface $request
-     * @param array $priorities A set of priorities.
-     * @return null|string
+     * @inheritdoc
      */
     public function getBestMatch(MessageInterface $request, array $priorities = array())
     {

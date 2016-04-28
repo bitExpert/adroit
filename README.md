@@ -50,10 +50,20 @@ $responderResolver = new \bitExpert\Adroit\Responder\Resolver\ContainerAwareResp
 ```
 
 In addition to that we ship a NegotiatingResponderResolver (\bitExpert\Adroit\Responder\Resolver\NegotiatingResponderResolver)
-which can be used to select a responder based on the content type of the incoming request.
+which can be used to select a responder based on the content type of the incoming request. In case the request is not acceptable
+for any reason, you have to provide a notAcceptableResponder:
 
 ```php
+use Negotiation\Negotiator;
+
+$negotiationService = new ContentNegotiationManager(new Negotiator());
+$notAcceptableResponder = function (Payload $domainPayload, ResponseInterface $response) {
+    return $response->withStatus(406);
+};
+
 $negotiatingResponderResolver = new \bitExpert\Adroit\Responder\Resolver\NegotiatingResponderResolver(
+    $negiotiationService,
+    $notAcceptableResponder,
     [
         'text/html' => $responderResolver
     ]

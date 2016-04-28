@@ -10,7 +10,7 @@
  */
 namespace bitExpert\Adroit\Responder\Resolver;
 
-use bitExpert\Adroit\Accept\ContentNegotiationManager;
+use bitExpert\Adroit\Accept\ContentNegotiationService;
 use bitExpert\Adroit\Responder\HttpStatusCodeResponder;
 use bitExpert\Adroit\Responder\Responder;
 use Psr\Http\Message\ServerRequestInterface;
@@ -31,9 +31,9 @@ class NegotiatingResponderResolver implements ResponderResolver
      */
     protected $responderResolver;
     /**
-     * @var ContentNegotiationManager
+     * @var ContentNegotiationService
      */
-    protected $negotiationManager;
+    protected $negotiationService;
     /**
      * @var Responder
      */
@@ -42,13 +42,13 @@ class NegotiatingResponderResolver implements ResponderResolver
     /**
      * Creates a new {@link \bitExpert\Adroit\Responder\Resolver\NegotiatingResponderResolver}.
      *
-     * @param ContentNegotiationManager $negotiationManager
+     * @param ContentNegotiationService $negotiationService
      * @param Responder $notAcceptedResponder
      * @param ResponderResolver[] $responderResolver
      */
-    public function __construct(ContentNegotiationManager $negotiationManager, Responder $notAcceptedResponder, array $responderResolver)
+    public function __construct(ContentNegotiationService $negotiationService, Responder $notAcceptedResponder, array $responderResolver)
     {
-        $this->negotiationManager = $negotiationManager;
+        $this->negotiationService = $negotiationService;
         $this->responderResolver = $responderResolver;
         $this->notAcceptedResponder = $notAcceptedResponder;
     }
@@ -58,7 +58,7 @@ class NegotiatingResponderResolver implements ResponderResolver
      */
     public function resolve(ServerRequestInterface $request, $identifier)
     {
-        $type = $this->negotiationManager->getBestMatch($request, array_keys($this->responderResolver));
+        $type = $this->negotiationService->getBestMatch($request, array_keys($this->responderResolver));
         if (null !== $type) {
             $resolvers = [];
             if (array_key_exists($type, $this->responderResolver)) {
