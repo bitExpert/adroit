@@ -16,9 +16,6 @@ use Zend\Diactoros\ServerRequest;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Action\SimpleForwardAction}.
- *
- * @covers \bitExpert\Adroit\Action\SimpleForwardAction
- * @covers \bitExpert\Adroit\Action\AbstractAction
  */
 class SimpleForwardActionUnitTest extends \PHPUnit_Framework_TestCase
 {

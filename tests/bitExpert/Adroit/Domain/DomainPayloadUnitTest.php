@@ -14,8 +14,6 @@ use bitExpert\Adroit\Domain\DomainPayload;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Domain\DomainPayload}.
- *
- * @covers \bitExpert\Adroit\Domain\DomainPayload
  */
 class DomainPayloadUnitTest extends \PHPUnit_Framework_TestCase
 {

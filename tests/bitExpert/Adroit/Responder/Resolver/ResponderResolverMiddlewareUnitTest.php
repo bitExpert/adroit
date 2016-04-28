@@ -18,10 +18,6 @@ use Psr\Http\Message\ResponseInterface;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware}.
- *
- * @covers \bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware
- * @covers \bitExpert\Adroit\Resolver\AbstractResolverMiddleware
- * @covers \bitExpert\Adroit\Resolver\CallableResolverMiddleware
  */
 class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 {

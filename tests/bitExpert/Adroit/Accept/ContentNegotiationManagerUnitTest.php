@@ -17,8 +17,6 @@ use Zend\Diactoros\Request;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Accept\ContentNegotiationManager}.
- *
- * @covers \bitExpert\Adroit\Accept\ContentNegotiationManager
  */
 class ContentNegotiationManagerUnitTest extends \PHPUnit_Framework_TestCase
 {

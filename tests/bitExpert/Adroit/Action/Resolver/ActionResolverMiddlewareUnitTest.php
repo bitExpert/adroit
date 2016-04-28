@@ -18,10 +18,6 @@ use bitExpert\Adroit\Resolver\Resolver;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Action\Resolver\ActionResolverMiddleware}.
- *
- * @covers \bitExpert\Adroit\Action\Resolver\ActionResolverMiddleware
- * @covers \bitExpert\Adroit\Resolver\AbstractResolverMiddleware
- * @covers \bitExpert\Adroit\Resolver\CallableResolverMiddleware
  */
 class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 {

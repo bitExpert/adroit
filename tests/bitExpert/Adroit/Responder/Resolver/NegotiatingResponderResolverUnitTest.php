@@ -18,8 +18,6 @@ use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Responder\Resolver\NegotiatingResponderResolver}.
- *
- * @covers \bitExpert\Adroit\Responder\Resolver\NegotiatingResponderResolver
  */
 class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
 {

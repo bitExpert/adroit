@@ -15,8 +15,6 @@ use Zend\Diactoros\ServerRequest;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Resolver\ContainerAwareResolver}.
- *
- * @covers \bitExpert\Adroit\Resolver\ArrayResolver
  */
 class ArrayResolverUnitTest extends \PHPUnit_Framework_TestCase
 {

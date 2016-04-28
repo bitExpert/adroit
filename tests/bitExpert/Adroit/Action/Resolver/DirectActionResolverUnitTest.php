@@ -15,8 +15,6 @@ use Zend\Diactoros\ServerRequest;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Action\Resolver\DirectActionResolver}.
- *
- * @covers \bitExpert\Adroit\Action\Resolver\DirectActionResolver
  */
 class DirectActionResolverUnitTest extends \PHPUnit_Framework_TestCase
 {
