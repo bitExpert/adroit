@@ -47,6 +47,10 @@ class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
      * @var ResponderResolver
      */
     protected $resolver2;
+    /**
+     * @var Responder
+     */
+    protected $notAcceptedResponder;
 
     /**
      * @see PHPUnit_Framework_TestCase::setUp()
@@ -60,8 +64,10 @@ class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
         $this->manager = $this->getMock(ContentNegotiationManager::class, [], [], '', false);
         $this->resolver1 = $this->getMock(ResponderResolver::class);
         $this->resolver2 = $this->getMock(ResponderResolver::class);
+        $this->notAcceptedResponder = $this->getMock(Responder::class);
         $this->resolver = new NegotiatingResponderResolver(
             $this->manager,
+            $this->notAcceptedResponder,
             [
                 'text/html' => $this->resolver1,
                 'text/vcard' => [
@@ -81,7 +87,7 @@ class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function noBestMatchWillReturnHttpStatusCodeResponder()
+    public function noBestMatchWillReturnNotAcceptedResponder()
     {
         $this->manager->expects($this->once())
             ->method('getBestMatch')
@@ -89,13 +95,13 @@ class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
 
         $responder = $this->resolver->resolve($this->request, $this->domainPayload);
 
-        $this->assertInstanceOf(HttpStatusCodeResponder::class, $responder);
+        $this->assertSame($this->notAcceptedResponder, $responder);
     }
 
     /**
      * @test
      */
-    public function whenNoRespondersExistForBestMatchWillReturnHttpStatusCodeResponder()
+    public function whenNoRespondersExistForBestMatchWillReturnNotAcceptedResponder()
     {
         $this->manager->expects($this->once())
             ->method('getBestMatch')
@@ -103,7 +109,7 @@ class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
 
         $responder = $this->resolver->resolve($this->request, $this->domainPayload);
 
-        $this->assertInstanceOf(HttpStatusCodeResponder::class, $responder);
+        $this->assertSame($this->notAcceptedResponder, $responder);
     }
 
     /**
@@ -156,6 +162,6 @@ class NegotiatingResponderResolverUnitTest extends \PHPUnit_Framework_TestCase
 
         $responder = $this->resolver->resolve($this->request, $this->domainPayload);
 
-        $this->assertInstanceOf(HttpStatusCodeResponder::class, $responder);
+        $this->assertSame($this->notAcceptedResponder, $responder);
     }
 }

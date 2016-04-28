@@ -34,17 +34,23 @@ class NegotiatingResponderResolver implements ResponderResolver
      * @var ContentNegotiationManager
      */
     protected $negotiationManager;
+    /**
+     * @var Responder
+     */
+    protected $notAcceptedResponder;
 
     /**
      * Creates a new {@link \bitExpert\Adroit\Responder\Resolver\NegotiatingResponderResolver}.
      *
      * @param ContentNegotiationManager $negotiationManager
+     * @param Responder $notAcceptedResponder
      * @param ResponderResolver[] $responderResolver
      */
-    public function __construct(ContentNegotiationManager $negotiationManager, array $responderResolver)
+    public function __construct(ContentNegotiationManager $negotiationManager, Responder $notAcceptedResponder, array $responderResolver)
     {
         $this->negotiationManager = $negotiationManager;
         $this->responderResolver = $responderResolver;
+        $this->notAcceptedResponder = $notAcceptedResponder;
     }
 
     /**
@@ -77,7 +83,7 @@ class NegotiatingResponderResolver implements ResponderResolver
         }
 
         // in case no matching responder could be found for the requested type we need
-        // to notify the client with an "406 Not acceptable" response.
-        return new HttpStatusCodeResponder(406);
+        // return the notAccepted responder
+        return $this->notAcceptedResponder;
     }
 }
