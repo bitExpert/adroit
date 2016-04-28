@@ -11,44 +11,41 @@
 namespace bitExpert\Adroit\Resolver;
 
 use bitExpert\Slf4PsrLog\LoggerFactory;
-use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Implementation of an {@link \bitExpert\Adroit\Resolver\Resolver} which will
  * pull the results from a "container-aware" service.
  */
-class ContainerAwareResolver implements Resolver
+class ArrayResolver implements Resolver
 {
     /**
-     * @var ContainerInterface
+     * @var array
      */
-    protected $container;
+    protected $mappings;
     /**
      * @var \Psr\Log\LoggerInterface the logger instance.
      */
     protected $logger;
 
     /**
-     * Creates a new {@link \bitExpert\Adroit\Action\Resolver\ContainerAwareActionResolver}.
+     * Creates a new {@link \bitExpert\Adroit\Resolver\ArrayResolver}.
      *
-     * @param ContainerInterface $container
+     * @param array $mappings
      * @throws \RuntimeException
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(array $mappings)
     {
-        $this->container = $container;
+        $this->mappings = $mappings;
         $this->logger = LoggerFactory::getLogger(__CLASS__);
     }
 
     /**
-     * {@inheritDoc}
-     * @throws \Interop\Container\Exception\ContainerException
-     * @throws \Interop\Container\Exception\NotFoundException
+     * @inheritdoc
      */
     public function resolve(ServerRequestInterface $request, $identifier)
     {
-        if (!$this->container->has($identifier)) {
+        if (!array_key_exists($identifier, $this->mappings)) {
             $this->logger->error(
                 sprintf(
                     'Could not find object defined by id "%s"',
@@ -59,6 +56,6 @@ class ContainerAwareResolver implements Resolver
             return null;
         }
 
-        return $this->container->get($identifier);
+        return $this->mappings[$identifier];
     }
 }

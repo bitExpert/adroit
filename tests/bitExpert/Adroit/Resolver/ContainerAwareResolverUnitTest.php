@@ -36,13 +36,13 @@ class ContainerAwareResolverUnitTest extends \PHPUnit_Framework_TestCase
     protected function setUp ()
     {
         $this->container = $this->getMock(ContainerInterface::class);
-        $this->resolver = $this->getMockForAbstractClass(ContainerAwareResolver::class, [$this->container]);
+        $this->resolver = new ContainerAwareResolver($this->container);
     }
 
     /**
      * @test
      */
-    public function returnsNullIfObjectWithIdCannotBeFoundInContainer()
+    public function returnsNullIfValueWithIdCannotBeFoundInContainer()
     {
         $id = 'TestID';
         $this->container->expects($this->once())
@@ -57,7 +57,7 @@ class ContainerAwareResolverUnitTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function returnsObjectIfObjectPresentInContainer()
+    public function returnsValueIfValuePresentInContainer()
     {
         $id = 'TestID';
         $obj = new \stdClass();
