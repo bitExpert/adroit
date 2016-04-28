@@ -10,10 +10,8 @@
  */
 namespace bitExpert\Adroit\Responder;
 
-use bitExpert\Adroit\Domain\DomainPayloadInterface;
-use Exception;
+use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
-use RuntimeException;
 
 /**
  * The HttpStatusCodeResponder creates a response for the given $statusCode. The
@@ -42,14 +40,14 @@ class HttpStatusCodeResponder implements Responder
 
     /**
      * {@inheritDoc}
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
-    public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response)
+    public function __invoke(Payload $payload, ResponseInterface $response)
     {
         try {
             return $response->withStatus($this->statusCode);
-        } catch (Exception $e) {
-            throw new RuntimeException('Response object could not be instantiated! ' . $e->getMessage());
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Response object could not be instantiated! ' . $e->getMessage());
         }
     }
 }

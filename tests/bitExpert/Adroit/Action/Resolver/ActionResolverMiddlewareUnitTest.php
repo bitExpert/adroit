@@ -10,13 +10,12 @@
  */
 namespace bitExpert\Adroit\Action\Resolver;
 
-use bitExpert\Pathfinder\Route;
-use bitExpert\Pathfinder\RoutingResult;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 use bitExpert\Adroit\Resolver\Resolver;
+
 /**
  * Unit test for {@link \bitExpert\Adroit\Action\Resolver\ActionResolverMiddleware}.
  *
@@ -43,22 +42,28 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      * @var ActionResolverMiddleware
      */
     protected $middleware;
+    /**
+     * @var ServerRequestInterface
+     */
+    protected $request;
+    /**
+     * @var ResponseInterface
+     */
+    protected $response;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
+        $this->request =  (new ServerRequest())->withAttribute(self::$routingResultAttribute, 'action');
+        $this->response = new Response();
         $this->resolvers = [
             $this->getMockForAbstractClass(ActionResolver::class),
             $this->getMockForAbstractClass(ActionResolver::class)
         ];
 
-        $this->middleware = new ActionResolverMiddleware(
-            $this->resolvers,
-            self::$routingResultAttribute,
-            self::$domainPayloadAttribute
-        );
+        $this->middleware = new ActionResolverMiddleware($this->resolvers, self::$routingResultAttribute, self::$domainPayloadAttribute);
     }
 
     /**
@@ -76,10 +81,8 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $secondResolver->expects($this->never())
             ->method('resolve');
 
-        $request = new ServerRequest();
-        $route = Route::get('/')->to(function () {})->named('home');
-        $request = $request->withAttribute('routingResult', RoutingResult::forSuccess($route));
-        $this->middleware->__invoke($request, new Response());
+
+        $this->middleware->__invoke($this->request, $this->response);
     }
 
     /**
@@ -99,18 +102,14 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(function () {}));
 
 
-        $request = new ServerRequest();
-        $route = Route::get('/')->to(function () {})->named('home');
-        $request = $request->withAttribute(self::$routingResultAttribute, RoutingResult::forSuccess($route));
-
-        $this->middleware->__invoke($request, new Response());
+        $this->middleware->__invoke($this->request, $this->response);
     }
 
     /**
      * @test
-     * @expectedException \bitExpert\Adroit\Resolver\ResolveException
+     * @expectedException \bitExpert\Adroit\Action\Resolver\ActionResolveException
      */
-    public function throwsResolveExceptionIfAllResolversFail()
+    public function throwsActionResolveExceptionIfAllResolversFail()
     {
         $firstResolver = $this->resolvers[0];
         $secondResolver = $this->resolvers[1];
@@ -124,10 +123,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(null));
 
 
-        $request = new ServerRequest();
-        $route = Route::get('/')->to(function () {})->named('home');
-        $request = $request->withAttribute(self::$routingResultAttribute, RoutingResult::forSuccess($route));
-        $this->middleware->__invoke($request, new Response());
+        $this->middleware->__invoke($this->request, $this->response);
     }
 
     /**
@@ -137,7 +133,16 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     public function throwsExceptionIfResolverIsNotAnActionResolver()
     {
         $resolvers = array_merge($this->resolvers, [$this->getMockForAbstractClass(Resolver::class)]);
-        new ActionResolverMiddleware($resolvers, self::$routingResultAttribute, self::$domainPayloadAttribute);
+
+        $mock = $this->getMockBuilder(ActionResolverMiddleware::class)
+            ->disableOriginalConstructor()
+            ->setMethods(array('setDoors'))
+            ->getMockForAbstractClass();
+
+        // now call the constructor
+        $reflectedClass = new \ReflectionClass(ActionResolverMiddleware::class);
+        $constructor = $reflectedClass->getConstructor();
+        $constructor->invoke($mock, $resolvers, self::$routingResultAttribute, self::$domainPayloadAttribute);
     }
 
     /**
@@ -151,22 +156,12 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @expectedException \bitExpert\Adroit\Resolver\ResolveException
+     * @expectedException \bitExpert\Adroit\Action\Resolver\ActionResolveException
      */
     public function throwsExceptionIfActionIdentifierCannotBeDetermined()
     {
-        $this->middleware->__invoke(new ServerRequest(), new Response());
-    }
-
-    /**
-     * @test
-     * @expectedException \bitExpert\Adroit\Resolver\ResolveException
-     */
-    public function throwsExceptionIfRoutingResultFailed()
-    {
-        $request = new ServerRequest();
-        $request = $request->withAttribute(self::$routingResultAttribute, RoutingResult::forFailure(RoutingResult::FAILED_NOT_FOUND));
-        $this->middleware->__invoke($request, new Response());
+        $this->request = $this->request->withoutAttribute(self::$routingResultAttribute);
+        $this->middleware->__invoke($this->request, $this->response);
     }
 
     /**
@@ -184,11 +179,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->method('resolve')
             ->will($this->returnValue($callableAction));
 
-        $request = new ServerRequest();
-
-        $route = Route::get('/', 'action');
-        $request = $request->withAttribute(self::$routingResultAttribute, RoutingResult::forSuccess($route));
-        $this->middleware->__invoke($request, new Response(), $next);
+        $this->middleware->__invoke($this->request, $this->response, $next);
 
         $this->assertTrue($called);
     }

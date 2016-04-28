@@ -33,6 +33,7 @@ abstract class ContainerAwareResolver implements Resolver
      * Creates a new {@link \bitExpert\Adroit\Action\Resolver\ContainerAwareActionResolver}.
      *
      * @param ContainerInterface $container
+     * @throws \RuntimeException
      */
     public function __construct(ContainerInterface $container)
     {
@@ -42,6 +43,8 @@ abstract class ContainerAwareResolver implements Resolver
 
     /**
      * {@inheritDoc}
+     * @throws \Interop\Container\Exception\ContainerException
+     * @throws \Interop\Container\Exception\NotFoundException
      */
     public function resolve(ServerRequestInterface $request, $identifier)
     {
@@ -57,6 +60,7 @@ abstract class ContainerAwareResolver implements Resolver
         }
 
         $resolved = $this->container->get($identifier);
+
         return $this->isValidResult($resolved) ? $resolved : null;
     }
 

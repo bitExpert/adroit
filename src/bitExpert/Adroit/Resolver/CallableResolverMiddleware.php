@@ -10,8 +10,6 @@
  */
 namespace bitExpert\Adroit\Resolver;
 
-use Psr\Http\Message\ServerRequestInterface;
-
 /**
  * Abstract middleware which resolves using an identifier and checks the result
  * for being callable
@@ -20,15 +18,6 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 abstract class CallableResolverMiddleware extends AbstractResolverMiddleware
 {
-    /**
-     * @inheritdoc
-     * @return callable
-     */
-    protected function resolve (ServerRequestInterface $request, $identifier)
-    {
-        return parent::resolve($request, $identifier);
-    }
-
     /**
      * @inheritdoc
      */

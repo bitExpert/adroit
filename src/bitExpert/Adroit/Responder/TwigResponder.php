@@ -10,7 +10,7 @@
  */
 namespace bitExpert\Adroit\Responder;
 
-use bitExpert\Adroit\Domain\DomainPayloadInterface;
+use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -71,18 +71,19 @@ class TwigResponder implements Responder
     /**
      * {@inheritDoc}
      * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      * @throws \Twig_Error_Syntax
      * @throws \Twig_Error_Loader
      * @throws \Twig_Error_Runtime
      */
-    public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response)
+    public function __invoke(Payload $payload, ResponseInterface $response)
     {
         if (null === $this->template) {
             throw new \RuntimeException('No template set to render!');
         }
 
         $response->getBody()->rewind();
-        $response->getBody()->write($this->twig->render($this->template, $domainPayload->getValues()));
+        $response->getBody()->write($this->twig->render($this->template, $payload->getValues()));
 
         $headers = array_merge($this->headers, ['Content-Type' => 'text/html']);
         foreach ($headers as $header => $value) {

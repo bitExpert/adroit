@@ -33,7 +33,6 @@ class ContentNegotiationManager
      */
     public function __construct(Negotiator $negotiator)
     {
-
         $this->negotiator = $negotiator;
     }
 

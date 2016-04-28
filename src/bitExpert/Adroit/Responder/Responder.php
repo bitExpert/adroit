@@ -10,7 +10,7 @@
  */
 namespace bitExpert\Adroit\Responder;
 
-use bitExpert\Adroit\Domain\DomainPayloadInterface;
+use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -27,9 +27,9 @@ interface Responder
      * Build the response (e.g. render a view template, return a redirect response, ...).
      * Might throw a {@link RuntimeException} in case sth. goes wrong.
      *
-     * @param DomainPayloadInterface $domainPayload
+     * @param Payload $payload
      * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response);
+    public function __invoke(Payload $payload, ResponseInterface $response);
 }

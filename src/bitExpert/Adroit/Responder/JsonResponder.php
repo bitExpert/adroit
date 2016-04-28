@@ -10,7 +10,7 @@
  */
 namespace bitExpert\Adroit\Responder;
 
-use bitExpert\Adroit\Domain\DomainPayloadInterface;
+use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -38,11 +38,12 @@ class JsonResponder implements Responder
     /**
      * {@inheritDoc}
      * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      */
-    public function __invoke(DomainPayloadInterface $domainPayload, ResponseInterface $response)
+    public function __invoke(Payload $payload, ResponseInterface $response)
     {
         $response->getBody()->rewind();
-        $response->getBody()->write(json_encode($domainPayload->getValues()));
+        $response->getBody()->write(json_encode($payload->getValues()));
 
         $headers = array_merge($this->headers, ['Content-Type' => 'application/json']);
         foreach ($headers as $header => $value) {

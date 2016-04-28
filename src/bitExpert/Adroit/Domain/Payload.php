@@ -14,7 +14,7 @@ namespace bitExpert\Adroit\Domain;
  *
  * @api
  */
-interface DomainPayloadInterface
+interface Payload
 {
     /**
      * Returns the type of the payload

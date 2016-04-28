@@ -11,8 +11,18 @@
 namespace bitExpert\Adroit\Responder;
 
 use bitExpert\Adroit\Middleware;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
-interface ResponderMiddleware extends Middleware
+interface ResponderMiddleware
 {
-
+    /**
+     * PSR-7 middleware signatured magic method
+     *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param callable|null $next
+     * @return ResponseInterface
+     */
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null);
 }

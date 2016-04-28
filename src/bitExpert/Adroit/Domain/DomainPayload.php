@@ -15,7 +15,7 @@ namespace bitExpert\Adroit\Domain;
  *
  * @api
  */
-class DomainPayload implements DomainPayloadInterface
+class DomainPayload implements Payload
 {
     /**
      * @var mixed

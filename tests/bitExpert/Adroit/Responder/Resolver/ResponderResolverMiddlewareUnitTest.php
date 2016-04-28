@@ -103,7 +103,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @expectedException \bitExpert\Adroit\Resolver\ResolveException
+     * @expectedException \bitExpert\Adroit\Responder\Resolver\ResponderResolveException
      */
     public function throwsResolveExceptionIfAllResolversFail()
     {

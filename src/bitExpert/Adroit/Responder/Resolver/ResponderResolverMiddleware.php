@@ -30,7 +30,7 @@ class ResponderResolverMiddleware extends CallableResolverMiddleware implements 
 
     /**
      * @inheritdoc
-     * @throws ResolveException
+     * @throws ResponderResolveException
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
@@ -48,7 +48,13 @@ class ResponderResolverMiddleware extends CallableResolverMiddleware implements 
             return $response;
         }
 
-        $responder = $this->resolve($request, $domainPayload->getType());
+        try {
+            /* @var $responder callable */
+            $responder = $this->resolve($request, $domainPayload->getType());
+        } catch (ResolveException $e) {
+            throw new ResponderResolveException('None of given resolvers could resolve a responder', $e->getCode(), $e);
+        }
+
         $response = $responder($domainPayload, $response);
 
         if ($next) {
