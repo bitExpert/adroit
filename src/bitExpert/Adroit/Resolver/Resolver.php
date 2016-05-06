@@ -10,8 +10,6 @@
  */
 namespace bitExpert\Adroit\Resolver;
 
-use Psr\Http\Message\ServerRequestInterface;
-
 /**
  * A resolver will resolve something by using the request and given identifier
  *
@@ -24,9 +22,8 @@ interface Resolver
      * If no matching {@link \bitExpert\Adroit\Action\Action} instance could be found, null will be
      * returned.
      *
-     * @param ServerRequestInterface $request
      * @param mixed $identifier
      * @return mixed
      */
-    public function resolve(ServerRequestInterface $request, $identifier);
+    public function resolve($identifier);
 }

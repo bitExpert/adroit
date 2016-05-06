@@ -10,17 +10,25 @@
  */
 namespace bitExpert\Adroit\Responder\Resolver;
 
-use bitExpert\Adroit\Resolver\CallableResolverMiddleware;
+use bitExpert\Adroit\Resolver\AbstractResolverMiddleware;
 use bitExpert\Adroit\Resolver\ResolveException;
 use bitExpert\Adroit\Responder\ResponderMiddleware;
 use bitExpert\Adroit\Resolver\Resolver;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class ResponderResolverMiddleware extends CallableResolverMiddleware implements ResponderMiddleware
+class ResponderResolverMiddleware extends AbstractResolverMiddleware implements ResponderMiddleware
 {
+    /**
+     * @var string
+     */
     protected $domainPayloadAttribute;
 
+    /**
+     * @param \bitExpert\Adroit\Responder\Resolver\ResponderResolver|\bitExpert\Adroit\Responder\Resolver\ResponderResolver[] $resolvers
+     * @param string $domainPayloadAttribute
+     * @throws \InvalidArgumentException
+     */
     public function __construct($resolvers, $domainPayloadAttribute)
     {
         parent::__construct($resolvers);
@@ -49,8 +57,7 @@ class ResponderResolverMiddleware extends CallableResolverMiddleware implements 
         }
 
         try {
-            /* @var $responder callable */
-            $responder = $this->resolve($request, $domainPayload->getType());
+            $responder = $this->resolve($request);
         } catch (ResolveException $e) {
             throw new ResponderResolveException('None of given resolvers could resolve a responder', $e->getCode(), $e);
         }
@@ -62,6 +69,20 @@ class ResponderResolverMiddleware extends CallableResolverMiddleware implements 
         }
 
         return $response;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getIdentifier(ServerRequestInterface $request)
+    {
+        $domainPayload = $request->getAttribute($this->domainPayloadAttribute);
+
+        if (null === $domainPayload) {
+            return null;
+        }
+
+        return $domainPayload->getType();
     }
 
     /**

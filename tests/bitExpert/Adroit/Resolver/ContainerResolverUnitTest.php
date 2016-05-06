@@ -12,12 +12,11 @@ namespace bitExpert\Adroit\Resolver;
 
 use Zend\Diactoros\Response;
 use Interop\Container\ContainerInterface;
-use Zend\Diactoros\ServerRequest;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Resolver\ContainerAwareResolver}.
  */
-class ContainerAwareResolverUnitTest extends \PHPUnit_Framework_TestCase
+class ContainerResolverUnitTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -34,7 +33,7 @@ class ContainerAwareResolverUnitTest extends \PHPUnit_Framework_TestCase
     protected function setUp ()
     {
         $this->container = $this->getMock(ContainerInterface::class);
-        $this->resolver = new ContainerAwareResolver($this->container);
+        $this->resolver = new ContainerResolver($this->container);
     }
 
     /**
@@ -48,7 +47,7 @@ class ContainerAwareResolverUnitTest extends \PHPUnit_Framework_TestCase
             ->with($id)
             ->will($this->returnValue(false));
 
-        $obj = $this->resolver->resolve(new ServerRequest(), $id);
+        $obj = $this->resolver->resolve($id);
         $this->assertNull($obj);
     }
 
@@ -70,7 +69,7 @@ class ContainerAwareResolverUnitTest extends \PHPUnit_Framework_TestCase
             ->with($id)
             ->will($this->returnValue($obj));
 
-        $resolved = $this->resolver->resolve(new ServerRequest(), $id);
+        $resolved = $this->resolver->resolve($id);
         $this->assertSame($obj, $resolved);
     }
 
@@ -92,7 +91,7 @@ class ContainerAwareResolverUnitTest extends \PHPUnit_Framework_TestCase
             ->with($id)
             ->will($this->returnValue($obj));
 
-        $resolved = $this->resolver->resolve(new ServerRequest(), $id);
+        $resolved = $this->resolver->resolve($id);
         $this->assertSame($obj, $resolved);
     }
 }

@@ -10,13 +10,13 @@
  */
 namespace bitExpert\Adroit\Responder\Resolver;
 
-use bitExpert\Adroit\Resolver\ContainerAwareResolver;
+use bitExpert\Adroit\Resolver\ContainerResolver;
 
 /**
  * Implementation of an {@link \bitExpert\Adroit\Responder\Resolver\ResponderResolver} which will
  * pull the actions from a "container-aware" service.
  */
-class ContainerAwareResponderResolver extends ContainerAwareResolver implements ResponderResolver
+class ContainerResponderResolver extends ContainerResolver implements ResponderResolver
 {
 
 }

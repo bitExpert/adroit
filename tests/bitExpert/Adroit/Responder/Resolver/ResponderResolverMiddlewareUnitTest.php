@@ -10,7 +10,7 @@
  */
 namespace bitExpert\Adroit\Responder\Resolver;
 
-use bitExpert\Adroit\Domain\DomainPayload;
+use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
@@ -66,7 +66,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $secondResolver->expects($this->never())
             ->method('resolve');
 
-        $payload = $this->getMockBuilder(DomainPayload::class)->disableOriginalConstructor()->getMock();
+        $payload = $this->getMock(Payload::class);
 
         $request = new ServerRequest();
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
@@ -90,7 +90,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(function () {}));
 
 
-        $payload = $this->getMockBuilder(DomainPayload::class)->disableOriginalConstructor()->getMock();
+        $payload = $this->getMock(Payload::class);
 
         $request = new ServerRequest();
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
@@ -115,12 +115,21 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(null));
 
 
-        $payload = $this->getMockBuilder(DomainPayload::class)->disableOriginalConstructor()->getMock();
+        $payload = $this->getMock(Payload::class);
 
         $request = new ServerRequest();
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
         $this->middleware->__invoke($request, new Response());
     }
+
+    /**
+     * @test
+     * @expectedException \bitExpert\Adroit\Responder\Resolver\ResponderResolveException
+     */
+    public function throwsExceptionIfDomainPayloadIsNotPresent()
+    {
+        $this->middleware->__invoke(new ServerRequest(), new Response());
+    }    
 
     /**
      * @test
@@ -169,8 +178,8 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         };
 
         $request = new ServerRequest();
-        $payload = new DomainPayload('test');
-        $responder = function (DomainPayload $payload, ResponseInterface $response) {
+        $payload = $this->getMock(Payload::class);
+        $responder = function (Payload $payload, ResponseInterface $response) {
             return $response;
         };
         $this->resolvers[0]->expects($this->once())

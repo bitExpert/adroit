@@ -25,11 +25,10 @@ abstract class AbstractResolverMiddleware
      * @param Resolver[] | Resolver $resolvers
      * @throws \InvalidArgumentException
      */
-    public function __construct($resolvers)
+    public function __construct(array $resolvers)
     {
         $this->logger = LoggerFactory::getLogger(__CLASS__);
-        $this->resolvers = [];
-        $this->setResolvers($resolvers);
+        $this->resolvers = $resolvers;
     }
 
     /**
@@ -38,9 +37,8 @@ abstract class AbstractResolverMiddleware
      * @param $resolvers
      * @throws \InvalidArgumentException
      */
-    private function setResolvers($resolvers)
+    private function validateResolvers($resolvers)
     {
-        $resolvers = is_array($resolvers) ? $resolvers : [$resolvers];
         foreach ($resolvers as $index => $resolver) {
             if (!$this->isValidResolver($resolver)) {
                 throw new \InvalidArgumentException(sprintf(
@@ -49,8 +47,6 @@ abstract class AbstractResolverMiddleware
                     get_class($resolver)
                 ));
             }
-
-            $this->resolvers[] = $resolver;
         }
     }
 
@@ -71,25 +67,40 @@ abstract class AbstractResolverMiddleware
     abstract protected function isValidResolver(Resolver $resolver);
 
     /**
+     * Returns the identifier used for the resolver process
+     *
+     * @param ServerRequestInterface $request
+     * @return mixed
+     */
+    abstract protected function getIdentifier(ServerRequestInterface $request);
+
+    /**
      * Returns whether the resolved is valid or not
      *
      * @param $result
      * @return bool
      */
-    abstract protected function isValidResult($result);
+    protected function isValidResult($result)
+    {
+        return is_callable($result);
+    }
 
     /**
      * @param ServerRequestInterface $request
-     * @param $identifier
      * @throws ResolveException
+     * @throws \InvalidArgumentException
      * @return mixed
      */
-    protected function resolve(ServerRequestInterface $request, $identifier)
+    protected function resolve(ServerRequestInterface $request)
     {
+        $identifier = $this->getIdentifier($request);
         $identifierName = $this->getRepresentation($identifier);
+        $resolvers = $this->getApplicableResolvers($request);
 
-        foreach ($this->resolvers as $index => $resolver) {
-            $resolved = $resolver->resolve($request, $identifier);
+        $this->validateResolvers($resolvers);
+
+        foreach ($resolvers as $index => $resolver) {
+            $resolved = $resolver->resolve($identifier);
             $resolvedName = $this->getRepresentation($resolved);
 
             if (!$this->isValidResult($resolved)) {
@@ -129,6 +140,15 @@ abstract class AbstractResolverMiddleware
         $this->logger->error($message);
 
         throw new ResolveException($message);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return array|Resolver[]
+     */
+    protected function getApplicableResolvers(ServerRequestInterface $request)
+    {
+        return $this->resolvers;
     }
 
     /**

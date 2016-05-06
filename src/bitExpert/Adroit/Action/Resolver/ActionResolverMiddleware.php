@@ -11,13 +11,13 @@
 namespace bitExpert\Adroit\Action\Resolver;
 
 use bitExpert\Adroit\Action\ActionMiddleware;
-use bitExpert\Adroit\Resolver\CallableResolverMiddleware;
+use bitExpert\Adroit\Resolver\AbstractResolverMiddleware;
 use bitExpert\Adroit\Resolver\ResolveException;
 use bitExpert\Adroit\Resolver\Resolver;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class ActionResolverMiddleware extends CallableResolverMiddleware implements ActionMiddleware
+class ActionResolverMiddleware extends AbstractResolverMiddleware implements ActionMiddleware
 {
     /**
      * @var string
@@ -28,6 +28,12 @@ class ActionResolverMiddleware extends CallableResolverMiddleware implements Act
      */
     protected $domainPayloadAttribute;
 
+    /**
+     * @param \bitExpert\Adroit\Action\Resolver\ActionResolver|\bitExpert\Adroit\Action\Resolver\ActionResolver[] $resolvers
+     * @param $routingResultAttribute
+     * @param $domainPayloadAttribute
+     * @throws \InvalidArgumentException
+     */
     public function __construct($resolvers, $routingResultAttribute, $domainPayloadAttribute)
     {
         parent::__construct($resolvers);
@@ -42,15 +48,9 @@ class ActionResolverMiddleware extends CallableResolverMiddleware implements Act
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
-        $actionIdentifier = $this->getActionIdentifier($request);
-
-        if (null === $actionIdentifier) {
-            throw new ActionResolveException('Could not determine action for request');
-        }
-
         try {
             /* @var $action callable */
-            $action = $this->resolve($request, $actionIdentifier);
+            $action = $this->resolve($request);
         } catch (ResolveException $e) {
             throw new ActionResolveException('None of given resolvers could resolve an action', $e->getCode(), $e);
         }
@@ -83,12 +83,9 @@ class ActionResolverMiddleware extends CallableResolverMiddleware implements Act
     }
 
     /**
-     * Returns the action identifier
-     *
-     * @param ServerRequestInterface $request
-     * @return mixed
+     * @inheritdoc
      */
-    protected function getActionIdentifier(ServerRequestInterface $request)
+    protected function getIdentifier(ServerRequestInterface $request)
     {
         return $request->getAttribute($this->routingResultAttribute);
     }

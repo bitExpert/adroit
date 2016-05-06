@@ -12,13 +12,12 @@ namespace bitExpert\Adroit\Resolver;
 
 use bitExpert\Slf4PsrLog\LoggerFactory;
 use Interop\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Implementation of an {@link \bitExpert\Adroit\Resolver\Resolver} which will
  * pull the results from a "container-aware" service.
  */
-class ContainerAwareResolver implements Resolver
+class ContainerResolver implements Resolver
 {
     /**
      * @var ContainerInterface
@@ -46,7 +45,7 @@ class ContainerAwareResolver implements Resolver
      * @throws \Interop\Container\Exception\ContainerException
      * @throws \Interop\Container\Exception\NotFoundException
      */
-    public function resolve(ServerRequestInterface $request, $identifier)
+    public function resolve($identifier)
     {
         if (!$this->container->has($identifier)) {
             $this->logger->error(
