@@ -55,8 +55,8 @@ class AdroitMiddleware extends MiddlewarePipe
      */
     public function __construct(
         ActionMiddleware $actionMiddleware,
-        ResponderMiddleware $responderMiddleware)
-    {
+        ResponderMiddleware $responderMiddleware
+    ) {
         parent::__construct();
 
         $this->actionMiddleware = $actionMiddleware;

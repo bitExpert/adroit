@@ -59,7 +59,11 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             $this->getMockForAbstractClass(ActionResolver::class)
         ];
 
-        $this->middleware = new ActionResolverMiddleware($this->resolvers, self::$routingResultAttribute, self::$domainPayloadAttribute);
+        $this->middleware = new ActionResolverMiddleware(
+            $this->resolvers,
+            self::$routingResultAttribute,
+            self::$domainPayloadAttribute
+        );
     }
 
     /**
@@ -72,7 +76,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $firstResolver->expects($this->once())
             ->method('resolve')
-            ->will($this->returnValue(function () {}));
+            ->will($this->returnValue($this->createSimpleAction()));
 
         $secondResolver->expects($this->never())
             ->method('resolve');
@@ -95,7 +99,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $secondResolver->expects($this->once())
             ->method('resolve')
-            ->will($this->returnValue(function () {}));
+            ->will($this->returnValue($this->createSimpleAction()));
 
 
         $this->middleware->__invoke($this->request, $this->response);
@@ -129,7 +133,11 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     public function throwsExceptionIfResolverIsNotAnActionResolver()
     {
         $resolvers = array_merge($this->resolvers, [$this->getMockForAbstractClass(Resolver::class)]);
-        $middleware = new ActionResolverMiddleware($resolvers, self::$routingResultAttribute, self::$domainPayloadAttribute);
+        $middleware = new ActionResolverMiddleware(
+            $resolvers,
+            self::$routingResultAttribute,
+            self::$domainPayloadAttribute
+        );
 
         $middleware->__invoke($this->request, $this->response);
     }
@@ -159,17 +167,49 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     public function callsNextMiddlewareIfPresentAndActionCouldBeExecuted()
     {
         $called = false;
-        $next = function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) use (&$called) {
+        $next = function (
+            ServerRequestInterface $request,
+            ResponseInterface $response,
+            callable $next = null
+        ) use (&$called) {
             $called = true;
         };
-        $callableAction = function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) {};
+
         $resolver = $this->resolvers[0];
         $resolver->expects($this->once())
             ->method('resolve')
-            ->will($this->returnValue($callableAction));
+            ->will($this->returnValue($this->createSimpleAction()));
 
         $this->middleware->__invoke($this->request, $this->response, $next);
 
         $this->assertTrue($called);
+    }
+
+    /**
+     * @test
+     * @expectedException \bitExpert\Adroit\Action\ActionExecutionException
+     */
+    public function throwsExceptionIfReturnedTypeIsInvalid()
+    {
+        $firstResolver = $this->resolvers[0];
+
+        $firstResolver->expects($this->once())
+            ->method('resolve')
+            ->will($this->returnValue(function () {
+                
+            }));
+
+        $this->middleware->__invoke($this->request, $this->response);
+    }
+
+    /**
+     * Creates a simple action which returns the response directly to be a valid action
+     * @return \Closure
+     */
+    protected function createSimpleAction()
+    {
+        return function (ServerRequestInterface $request, ResponseInterface $response) {
+            return $response;
+        };
     }
 }

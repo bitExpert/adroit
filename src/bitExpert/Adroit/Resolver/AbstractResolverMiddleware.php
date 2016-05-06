@@ -61,7 +61,11 @@ abstract class AbstractResolverMiddleware
      * @param callable|null $next
      * @return ResponseInterface
      */
-    abstract public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null);
+    abstract public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $next = null
+    );
 
     /**
      * Returns whether given resolver is valid or not
@@ -162,7 +166,7 @@ abstract class AbstractResolverMiddleware
      * @param $obj
      * @return string
      */
-    private function getRepresentation($obj)
+    protected function getRepresentation($obj)
     {
         if (is_object($obj)) {
             return get_class($obj);

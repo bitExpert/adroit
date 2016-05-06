@@ -19,7 +19,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Unit test for {@link \bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware}.
  */
-class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
+class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -61,7 +61,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $firstResolver->expects($this->once())
             ->method('resolve')
-            ->will($this->returnValue(function () {}));
+            ->will($this->returnValue($this->createSimpleResponder()));
 
         $secondResolver->expects($this->never())
             ->method('resolve');
@@ -87,7 +87,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $secondResolver->expects($this->once())
             ->method('resolve')
-            ->will($this->returnValue(function () {}));
+            ->will($this->returnValue($this->createSimpleResponder()));
 
 
         $payload = $this->getMock(Payload::class);
@@ -129,7 +129,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     public function throwsExceptionIfDomainPayloadIsNotPresent()
     {
         $this->middleware->__invoke(new ServerRequest(), new Response());
-    }    
+    }
 
     /**
      * @test
@@ -155,7 +155,11 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     {
         $called = false;
 
-        $next = function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) use (&$called) {
+        $next = function (
+            ServerRequestInterface $request,
+            ResponseInterface $response,
+            callable $next = null
+        ) use (&$called) {
             $called = true;
         };
 
@@ -173,21 +177,48 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     {
         $called = false;
 
-        $next = function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) use (&$called) {
+        $next = function (
+            ServerRequestInterface $request,
+            ResponseInterface $response,
+            callable $next = null
+        ) use (&$called) {
             $called = true;
         };
 
         $request = new ServerRequest();
         $payload = $this->getMock(Payload::class);
-        $responder = function (Payload $payload, ResponseInterface $response) {
-            return $response;
-        };
         $this->resolvers[0]->expects($this->once())
             ->method('resolve')
-            ->will($this->returnValue($responder));
+            ->will($this->returnValue($this->createSimpleResponder()));
 
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
         $this->middleware->__invoke($request, new Response(), $next);
         $this->assertTrue($called);
+    }
+
+    /**
+     * @test
+     * @expectedException \bitExpert\Adroit\Responder\ResponderExecutionException
+     */
+    public function throwsExceptionIfResponderDoesNotReturnAResponse()
+    {
+        $this->resolvers[0]->expects($this->once())
+            ->method('resolve')
+            ->will($this->returnValue(function () {
+
+            }));
+
+        $this->middleware->__invoke(new ServerRequest(), new Response());
+    }
+
+    /**
+     * Creates a simple responder which returns a response to be valid
+     * @return \Closure
+     */
+    protected function createSimpleResponder()
+    {
+        return function (Payload $payload, ResponseInterface $response) {
+            return $response;
+        };
     }
 }

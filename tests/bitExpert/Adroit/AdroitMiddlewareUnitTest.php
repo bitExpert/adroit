@@ -163,15 +163,19 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Returns a middleware. You may define an additional callable which will be executed in front of the default behavior
-     * for testing purpose (e.g. testing call order)
+     * Returns a middleware. You may define an additional callable which will be executed in front of
+     * the default behavior for testing purpose (e.g. testing call order)
      *
      * @param callable|null $specializedFn
      * @return \Closure
      */
     protected function createTestMiddleware(callable $specializedFn = null)
     {
-        return function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) use ($specializedFn) {
+        return function (
+            ServerRequestInterface $request,
+            ResponseInterface $response,
+            callable $next = null
+        ) use ($specializedFn) {
             if ($specializedFn) {
                 $specializedFn();
             }

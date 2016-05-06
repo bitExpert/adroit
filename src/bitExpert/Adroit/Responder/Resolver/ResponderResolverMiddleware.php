@@ -12,10 +12,12 @@ namespace bitExpert\Adroit\Responder\Resolver;
 
 use bitExpert\Adroit\Resolver\AbstractResolverMiddleware;
 use bitExpert\Adroit\Resolver\ResolveException;
+use bitExpert\Adroit\Responder\ResponderExecutionException;
 use bitExpert\Adroit\Responder\ResponderMiddleware;
 use bitExpert\Adroit\Resolver\Resolver;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use bitExpert\Adroit\Responder\Resolver\ResponderResolver;
 
 class ResponderResolverMiddleware extends AbstractResolverMiddleware implements ResponderMiddleware
 {
@@ -25,7 +27,7 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware implements 
     protected $domainPayloadAttribute;
 
     /**
-     * @param \bitExpert\Adroit\Responder\Resolver\ResponderResolver|\bitExpert\Adroit\Responder\Resolver\ResponderResolver[] $resolvers
+     * @param ResponderResolver|ResponderResolver[] $resolvers
      * @param string $domainPayloadAttribute
      * @throws \InvalidArgumentException
      */
@@ -63,6 +65,14 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware implements 
         }
 
         $response = $responder($domainPayload, $response);
+        
+        if (!($response instanceof ResponseInterface)) {
+            throw new ResponderExecutionException(sprintf(
+                'The responder "%s" did not return an instance of "%s"',
+                $this->getRepresentation($responder),
+                ResponseInterface::class
+            ));
+        }
 
         if ($next) {
             $response = $next($request, $response);

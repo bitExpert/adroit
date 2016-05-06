@@ -30,7 +30,7 @@ class ContainerResolverUnitTest extends \PHPUnit_Framework_TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp ()
+    protected function setUp()
     {
         $this->container = $this->getMock(ContainerInterface::class);
         $this->resolver = new ContainerResolver($this->container);
