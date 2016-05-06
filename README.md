@@ -52,7 +52,6 @@ Of course you may implement your own ResponderResolvers using the (\bitExpert\Ad
 /** @var \Interop\Container\ContainerInterface $container */
 $responderResolver = new \bitExpert\Adroit\Responder\Resolver\ContainerAwareResponderResolver($container);
 ```
-```
 
 Domain(Payload)
 ---------------
