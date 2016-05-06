@@ -21,7 +21,7 @@ Usage
 
 The configure the \bitExpert\Adroit\AdroitMiddleware middleware you need provide an array of 
 \bitExpert\Adroit\Action\Resolver\ActionResolver, an array of \bitExpert\Adroit\Responder\Resolver\ResponderResolver and
-a router instance.
+a action request attribute telling adroit where to look for the action identifier.
 
 ActionResolver
 --------------
@@ -30,6 +30,8 @@ As the name implies ActionResolvers are responsible for resolving an action clas
 The actionToken is basically used to identify a route. Adroit comes with a default implementation of an ActionResolver 
 (\bitExpert\Adroit\Action\Resolver\ContainerAwareActionResolver) which uses any 
 [container-interop](https://github.com/container-interop/container-interop) compatible DI container as a backend.
+
+Of course you may implement your own ActionResolvers using the (\bitExpert\Adroit\Action\ActionResolver) interface.
 
 ```php
 /** @var \Interop\Container\ContainerInterface $container */
@@ -44,30 +46,46 @@ $type defined in the DomainPayload instance. Adroit comes with a default impleme
 (\bitExpert\Adroit\Responder\Resolver\ContainerAwareResponderResolver) which uses any 
 [container-interop](https://github.com/container-interop/container-interop) compatible DI container as a backend.
 
+Of course you may implement your own ResponderResolvers using the (\bitExpert\Adroit\Responder\ResponderResolver) interface.
+
 ```php
 /** @var \Interop\Container\ContainerInterface $container */
 $responderResolver = new \bitExpert\Adroit\Responder\Resolver\ContainerAwareResponderResolver($container);
 ```
+```
 
-In addition to that we ship a NegotiatingResponderResolver (\bitExpert\Adroit\Responder\Resolver\NegotiatingResponderResolver)
-which can be used to select a responder based on the content type of the incoming request. In case the request is not acceptable
-for any reason, you have to provide a notAcceptableResponder:
+Domain(Payload)
+---------------
+You may define your own payload class(es) by implementing the \bitExpert\Adroit\Domain\Payload interface.
+This gives you the opportunity to freely define the payload according to your needs.
+This example implementation will be used in the documentation as follows:
 
 ```php
-use Negotiation\Negotiator;
+<?php
+namespace Acme\Domain;
+use bitExpert\Adroit\Domain\Payload;
 
-$negotiationService = new ContentNegotiationManager(new Negotiator());
-$notAcceptableResponder = function (Payload $domainPayload, ResponseInterface $response) {
-    return $response->withStatus(406);
-};
+class CustomPayload implements Payload
+{
+    protected $type;
+    protected $data;
 
-$negotiatingResponderResolver = new \bitExpert\Adroit\Responder\Resolver\NegotiatingResponderResolver(
-    $negiotiationService,
-    $notAcceptableResponder,
-    [
-        'text/html' => $responderResolver
-    ]
-);
+    public function __construct($type, array $data = [])
+    {
+        $this->type = $type;
+        $this->data = $data;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public fuction getValue($name)
+    {
+        return isset($this->data[$name]) ? $this->data[$name] : null;
+    }
+}
 ```
 
 
@@ -88,26 +106,25 @@ DomainPayload object. The PSR-7 response might come in handy when you have to de
 likely not want to read the file in your action class, push the content to the responder just to to write it to the response
 message body.
 
-The DomainPayload object takes an $type (an identifier for an responder) as well as an array of domain data. The 
+The Payload object takes an $type  as well as an array of domain data. The
 DomainPayload object will be passed "as-is" to the responder:
 
 ```php
 <?php 
 
-use bitExpert\Adroit\Action\AbstractAction;
+use Acme\Domain\CustomPayload;
+use bitExpert\Adroit\Action\Action;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class HelloWorldAction extends AbstractAction 
+class HelloWorldAction implements Action
 {
     /**
      * @inheritdoc
      */
-    protected function execute(ServerRequestInterface $request, ResponseInterface $response)
+    protected function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
-        return $this->createPayload('hello', [
-            'name' => 'World'
-        ]);
+        return new CustomPayload('hello', ['name' => 'World']);
     }
 }
 
@@ -121,12 +138,13 @@ interface so you **may** use Closures as well but implementing the interface is 
 
 ```php
 <?php 
+namespace Acme\Responder\HelloResponder;
 
 use bitExpert\Adroit\Responder\Responder;
 use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
 
-class HttpStatusCodeResponder implements Responder 
+class HelloResponder implements Responder
 {
     /**
      * @inheritdoc
@@ -145,50 +163,23 @@ class HttpStatusCodeResponder implements Responder
 Usage
 -----
 
-Since Adroit provides a handy set of middlewares to achieve ADR you simply have to stick together the middlewares in correct order. 
-In the following example we use [zend-stratigility](https://github.com/zendframework/zend-stratigility) to ease the combination
-of middlewares, [zend-diactoros](https://github.com/zendframework/zend-diactoros) for PSR-7 implementation of request and 
-response and the EmitterInterface implementation:
+Since Adroit provides a handy set of middlewares to achieve ADR you simply have to configure your ActionResolver(s) and
+ResponderResolver(s). For the following example we use fictional "ArrayResolvers" which are configured using
+an array of mappings between the action identifier and the action and the domain payload type to the appropriate responder:
+
 
 ```php
-<?php 
-
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Zend\Stratigility\MiddlewarePipe;
-use Zend\Diactoros\ServerRequest;
-use Zend\Diactoros\Response;
-use bitExpert\Adroit\Action\Resolver\ActionResolverMiddleware;
-use bitExpert\Adroit\Action\Resolver\ArrayActionResolver;
-use bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware;
-use bitExpert\Adroit\Responder\Resolver\ArrayResponderResolver;
-use bitExpert\Adroit\Domain\Payload;
-use bitExpert\Adroit\Domain\DomainPayload;
-use Zend\Diactoros\Response\SapiEmitter;
-
-// The ActionMiddleware fetches the action identifier from the routing result attribute which we set here manually
-// (normally this would be done by a router or routing middleware) 
-$routingResultAttribute = 'action';
-
-// The ActionMiddleware will execute the action and put it into the requestAttribute 
-// The ResponderMiddleware will grab it from there, resolve a responder according to the domainloadtype,
-// and execute the found responder
-$domainPayloadAttribute = 'payload';
-
-// Just for better understanding of the execution:
-// $routingResultAttribute -> ActionMiddleware -> $domainPayloadAttribute -> ResponderMiddleware -> $response
+<?php
 
 // create the action resolver
 $actionResolver = new ArrayActionResolver([
     'helloAction' => function (ServerRequestInterface $request, ResponseInterface $response) {
-        return new DomainPayload('hello', [
+        return new CustomPayload('hello', [
             'name' => 'World'
         ]);
     }
 ]);
 
-// create the action resolver middleware with the instanciated action resolver
-$actionResolverMiddleware = new ActionResolverMiddleware([$actionResolver], $routingResultAttribute, $domainPayloadAttribute);
 
 // create the responder resolver
 $responderResolver = new ArrayResponderResolver([
@@ -199,27 +190,16 @@ $responderResolver = new ArrayResponderResolver([
     };
 ]);
 
-// create the resolver middleware with the instanciated responder resolver
-$responderResolverMiddleware = new ResponderResolverMiddleware([$responderResolver], $domainPayloadAttribute);
 
+$adroit = AdroitMiddleware::createDefault([$actionResolver], [$responderResolver], 'action');
+$request = ServerRequestFactory::fromGlobals()->withAttribute('action', 'helloAction');
 
-// create the application
-$app = new MiddlewarePipe();
-$app->pipe($actionResolverMiddleware);
-$app->pipe($responderResolverMiddleware);
-
-// create a new request, pointing at the action
-$request = (new ServerRequest())->withAttribute('action', 'helloAction');
-$response = new Response();
-
-// invoke the application using the configured request and response
-$response = $app($request, $response);
-
-// emit the response
+$response = $adroit($request, new Response());
 $emitter = new SapiEmitter();
 $emitter->emit($response);
 
 ```
+As you can see, you also may use simple callables as actions and responders.
 
 Adroit itself does not depend on a concrete PSR-7 implementation which means you should be able to use it in your set-up
 without running into problems. Just for the unit tests Adroit depends on zendframework/zend-diactoros as a PSR-7 implementation.
