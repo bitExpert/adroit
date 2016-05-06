@@ -10,7 +10,6 @@
  */
 namespace bitExpert\Adroit\Responder;
 
-use bitExpert\Adroit\Middleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 

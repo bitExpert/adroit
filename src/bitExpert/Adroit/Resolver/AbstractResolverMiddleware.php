@@ -17,6 +17,11 @@ use Psr\Http\Message\ResponseInterface;
 abstract class AbstractResolverMiddleware
 {
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * @var Resolver[]
      */
     protected $resolvers;

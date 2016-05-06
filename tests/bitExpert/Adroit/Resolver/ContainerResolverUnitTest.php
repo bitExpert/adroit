@@ -19,11 +19,11 @@ use Interop\Container\ContainerInterface;
 class ContainerResolverUnitTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var \Interop\Container\ContainerInterface
      */
     protected $container;
     /**
-     * @var ContainerAwareResolver
+     * @var ContainerResolver
      */
     protected $resolver;
 

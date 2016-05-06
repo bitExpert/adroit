@@ -129,13 +129,9 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     public function throwsExceptionIfResolverIsNotAnActionResolver()
     {
         $resolvers = array_merge($this->resolvers, [$this->getMockForAbstractClass(Resolver::class)]);
-        $mock = $this->getMockForAbstractClass(ActionResolverMiddleware::class, [
-            $resolvers,
-            self::$routingResultAttribute,
-            self::$domainPayloadAttribute
-        ]);
+        $middleware = new ActionResolverMiddleware($resolvers, self::$routingResultAttribute, self::$domainPayloadAttribute);
 
-        $mock->__invoke($this->request, $this->response);
+        $middleware->__invoke($this->request, $this->response);
     }
 
     /**
