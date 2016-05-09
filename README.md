@@ -189,10 +189,14 @@ $responderResolver = new ArrayResponderResolver([
     };
 ]);
 
+// Provide the request attribute where the routing result identifier is kept
+// and your resolvers
+$adroit = AdroitMiddleware::create('action', [$actionResolver], [$responderResolver]);
 
-$adroit = AdroitMiddleware::createDefault([$actionResolver], [$responderResolver], 'action');
+// create a request containing an action identifier inside the routing result attribute
 $request = ServerRequestFactory::fromGlobals()->withAttribute('action', 'helloAction');
 
+// and run adroit
 $response = $adroit($request, new Response());
 $emitter = new SapiEmitter();
 $emitter->emit($response);
@@ -202,6 +206,51 @@ As you can see, you also may use simple callables as actions and responders.
 
 Adroit itself does not depend on a concrete PSR-7 implementation which means you should be able to use it in your set-up
 without running into problems. Just for the unit tests Adroit depends on zendframework/zend-diactoros as a PSR-7 implementation.
+
+Middleware hooks
+----------------
+Adroit provides several hooks to be as flexible as a standard middleware pipe while
+implementing the ADR paradigm.
+
+You may use the following hooks to manipulate things in between the execution of
+the middlewares needed for ADR itself:
+
+```php
+// Gets piped in front of the ActionResolverMiddleware
+$adroit->beforeResolveAction($yourMiddleware);
+
+// Gets piped in front of the ActionExecutorMiddleware
+$adroit->beforeExecuteAction($yourMiddleware);
+
+// Gets piped in front of the ResponderResolverMiddleware
+$adroit->beforeResolveResponder($yourMiddleware);
+
+// Gets piped in front of the ResponderExecutorMiddleware
+$adroit->beforeExecuteResponder($yourMiddleware);
+```
+
+These hooks allow great flexibility but with great flexibility also comes
+great responsibility ;-) Please note that the hooks are named "before"
+and so are to implement the middlewares:
+
+```php
+
+function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) {
+
+    // Your awesome code
+
+    if ($next)
+        $response = $next($request, $response);
+    }
+
+    return $response;
+}
+
+```
+
+Of course you may implement it different, but that would not hit the "before" in the hook name.
+Please be aware of that!
+
 
 Routing
 -------
