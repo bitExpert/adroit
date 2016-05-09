@@ -10,11 +10,17 @@
  */
 namespace bitExpert\Adroit;
 
+use bitExpert\Adroit\Action\Action;
+use bitExpert\Adroit\Domain\Payload;
+use bitExpert\Adroit\Responder\Responder;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
-use bitExpert\Adroit\Action\ActionMiddleware;
+use bitExpert\Adroit\Action\Resolver\ActionResolverMiddleware;
+use bitExpert\Adroit\Action\Executor\ActionExecutorMiddleware;
+use bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware;
+use bitExpert\Adroit\Responder\Executor\ResponderExecutorMiddleware;
 use bitExpert\Adroit\Responder\ResponderMiddleware;
 
 /**
@@ -22,6 +28,7 @@ use bitExpert\Adroit\Responder\ResponderMiddleware;
  */
 class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 {
+    protected static $routingResultAttribute = 'routing';
     /**
      * @var ServerRequestInterface
      */
@@ -31,13 +38,25 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      */
     protected $response;
     /**
-     * @var \bitExpert\Adroit\Action\ActionMiddleware
+     * @var ActionResolverMiddleware
      */
-    protected $actionMiddleware;
+    protected $actionResolverMiddleware;
     /**
-     * @var \bitExpert\Adroit\Responder\ResponderMiddleware
+     * @var ActionExecutorMiddleware
      */
-    protected $responderMiddleware;
+    protected $actionExecutorMiddleware;
+    /**
+     * @var ResponderResolverMiddleware
+     */
+    protected $responderResolverMiddleware;
+    /**
+     * @var ResponderExecutorMiddleware
+     */
+    protected $responderExecutorMiddleware;
+    /**
+     * @var AdroitMiddleware
+     */
+    protected $middleware;
 
     /**
      * @see PHPUnit_Framework_TestCase::setUp()
@@ -45,110 +64,172 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->actionMiddleware = $this->getMock(ActionMiddleware::class);
-        $this->responderMiddleware = $this->getMock(ResponderMiddleware::class);
+        $this->actionResolverMiddleware = $this->getMockBuilder(ActionResolverMiddleware::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->actionExecutorMiddleware = $this->getMockBuilder(ActionExecutorMiddleware::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->responderResolverMiddleware = $this->getMockBuilder(ResponderResolverMiddleware::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->responderExecutorMiddleware = $this->getMockBuilder(ResponderExecutorMiddleware::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->request = new ServerRequest([], [], '/', 'GET');
         $this->response = new Response();
     }
 
+    protected function getMockedAdroitMiddleware($mockPipe = false)
+    {
+        if ($mockPipe) {
+            $methods = [
+                'pipe'
+            ];
+        } else {
+            $methods = [
+                'getActionResolverMiddleware',
+                'getActionExecutorMiddleware',
+                'getResponderResolverMiddleware',
+                'getResponderExecutorMiddleware'
+            ];
+        }
+
+        $middleware = $this->getMockBuilder(AdroitMiddleware::class)
+            ->setMethods($methods)
+            ->setConstructorArgs([
+                'routing',
+                [],
+                []
+            ])
+            ->getMock();
+
+        if (!$mockPipe) {
+            $middleware->expects($this->any())
+                ->method('getActionResolverMiddleware')
+                ->will($this->returnValue($this->actionResolverMiddleware));
+
+            $middleware->expects($this->any())
+                ->method('getActionExecutorMiddleware')
+                ->will($this->returnValue($this->actionExecutorMiddleware));
+
+            $middleware->expects($this->any())
+                ->method('getResponderResolverMiddleware')
+                ->will($this->returnValue($this->responderResolverMiddleware));
+
+            $middleware->expects($this->any())
+                ->method('getResponderExecutorMiddleware')
+                ->will($this->returnValue($this->responderExecutorMiddleware));
+        }
+        return $middleware;
+    }
+
     /**
      * @test
      */
-    public function beforeActionMiddlewareWillBeCalledBeforeActionMiddleware()
+    public function beforeResolveActionMiddlewareWillBeCalledBeforeActionResolveMiddleware()
     {
         $expectedOrder = [
-            'beforeAction',
-            'action'
+            'beforeResolveAction',
+            'resolveAction'
         ];
 
         $order = [];
-        $beforeActionMiddleware = $this->createTestMiddleware(function () use (&$order) {
-            $order[] = 'beforeAction';
+
+        $beforeResolveActionMiddleware = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'beforeResolveAction';
         });
 
-        $actionMiddlewareStub = $this->createTestMiddleware(function () use (&$order) {
-            $order[] = 'action';
+        $actionResolveMiddlewareStub = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'resolveAction';
         });
 
-        $this->actionMiddleware->expects($this->any())
+        $this->actionResolverMiddleware->expects($this->any())
             ->method('__invoke')
-            ->will($this->returnCallback($actionMiddlewareStub));
+            ->will($this->returnCallback($actionResolveMiddlewareStub));
 
+        $middleware = $this->getMockedAdroitMiddleware();
 
-        $middleware = new AdroitMiddleware($this->actionMiddleware, $this->responderMiddleware);
-
-        $middleware->beforeAction($beforeActionMiddleware);
+        $middleware->beforeResolveAction($beforeResolveActionMiddleware);
         $middleware->__invoke($this->request, $this->response);
+
         $this->assertEquals($order, $expectedOrder);
     }
 
     /**
      * @test
      */
-    public function beforeResponderMiddlewareWillBeCalledBeforeResponderMiddleware()
+    public function beforeExecuteActionMiddlewareWillBeCalledBeforeActionExecuteMiddleware()
     {
         $expectedOrder = [
-            'beforeResponder',
-            'responder'
+            'beforeActionExecute',
+            'actionExecute'
         ];
 
         $order = [];
 
-        $this->actionMiddleware->expects($this->any())
+        $beforeExecuteActionMiddleware = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'beforeActionExecute';
+        });
+
+        $actionExecutorMiddlewareStub = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'actionExecute';
+        });
+
+        $this->actionResolverMiddleware->expects($this->any())
             ->method('__invoke')
             ->will($this->returnCallback($this->createTestMiddleware()));
 
-        $beforeResponderMiddleware = $this->createTestMiddleware(function () use (&$order) {
-            $order[] = 'beforeResponder';
-        });
-
-        $responderMiddlewareStub = $this->createTestMiddleware(function () use (&$order) {
-            $order[] = 'responder';
-        });
-
-        $this->responderMiddleware->expects($this->any())
+        $this->actionExecutorMiddleware->expects($this->any())
             ->method('__invoke')
-            ->will($this->returnCallback($responderMiddlewareStub));
+            ->will($this->returnCallback($actionExecutorMiddlewareStub));
 
-        $middleware = new AdroitMiddleware($this->actionMiddleware, $this->responderMiddleware);
+        $middleware = $this->getMockedAdroitMiddleware();
 
-        $middleware->beforeResponder($beforeResponderMiddleware);
+        $middleware->beforeExecuteAction($beforeExecuteActionMiddleware);
         $middleware->__invoke($this->request, $this->response);
+
         $this->assertEquals($order, $expectedOrder);
     }
 
     /**
      * @test
      */
-    public function afterResponderMiddlewareWillBeCalledAfterResponderMiddleware()
+    public function beforeResolveResponderMiddlewareWillBeCalledBeforeResolveResponderMiddleware()
     {
         $expectedOrder = [
-            'responder',
-            'afterResponder'
+            'beforeResolveResponder',
+            'resolveResponder'
         ];
 
         $order = [];
 
-        $this->actionMiddleware->expects($this->any())
+        $this->actionResolverMiddleware->expects($this->any())
             ->method('__invoke')
             ->will($this->returnCallback($this->createTestMiddleware()));
 
-        $afterResponderMiddleware = $this->createTestMiddleware(function () use (&$order) {
-            $order[] = 'afterResponder';
-        });
-
-        $responderMiddlewareStub = $this->createTestMiddleware(function () use (&$order) {
-            $order[] = 'responder';
-        });
-
-        $this->responderMiddleware->expects($this->any())
+        $this->actionExecutorMiddleware->expects($this->any())
             ->method('__invoke')
-            ->will($this->returnCallback($responderMiddlewareStub));
+            ->will($this->returnCallback($this->createTestMiddleware()));
 
-        $middleware = new AdroitMiddleware($this->actionMiddleware, $this->responderMiddleware);
+        $beforeResolveResponderMiddleware = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'beforeResolveResponder';
+        });
 
-        $middleware->afterResponder($afterResponderMiddleware);
+        $responderResolverMiddlewareStub = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'resolveResponder';
+        });
+
+        $this->responderResolverMiddleware->expects($this->any())
+            ->method('__invoke')
+            ->will($this->returnCallback($responderResolverMiddlewareStub));
+
+        $middleware = $this->getMockedAdroitMiddleware();
+
+        $middleware->beforeResolveResponder($beforeResolveResponderMiddleware);
         $middleware->__invoke($this->request, $this->response);
         $this->assertEquals($order, $expectedOrder);
     }
@@ -156,9 +237,143 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function createDefaultCreatesMiddlewareWithDefaultMiddlewares()
+    public function beforeExecuteResponderMiddlewareWillBeCalledBeforeResponderExecutorMiddleware()
     {
-        $middleware = AdroitMiddleware::createDefault('routing', [], []);
+        $expectedOrder = [
+            'beforeExecuteResponder',
+            'executeResponder'
+        ];
+
+        $order = [];
+
+        $this->actionResolverMiddleware->expects($this->any())
+            ->method('__invoke')
+            ->will($this->returnCallback($this->createTestMiddleware()));
+
+        $this->actionExecutorMiddleware->expects($this->any())
+            ->method('__invoke')
+            ->will($this->returnCallback($this->createTestMiddleware()));
+
+        $this->responderResolverMiddleware->expects($this->any())
+            ->method('__invoke')
+            ->will($this->returnCallback($this->createTestMiddleware()));
+
+
+        $beforeExecuteResponderMiddleware = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'beforeExecuteResponder';
+        });
+
+        $responderExecutorMiddlewareStub = $this->createTestMiddleware(function () use (&$order) {
+            $order[] = 'executeResponder';
+        });
+
+        $this->responderExecutorMiddleware->expects($this->any())
+            ->method('__invoke')
+            ->will($this->returnCallback($responderExecutorMiddlewareStub));
+
+
+        $middleware = $this->getMockedAdroitMiddleware();
+
+        $middleware->beforeExecuteResponder($beforeExecuteResponderMiddleware);
+        $middleware->__invoke($this->request, $this->response);
+        $this->assertEquals($order, $expectedOrder);
+    }
+
+    /**
+     * @test
+     */
+    public function invokeCreatesActionResolverMiddleware()
+    {
+        // Get mock, without the constructor being called
+        $middleware = $this->getMockedAdroitMiddleware();
+
+        // set expectations for constructor calls
+        $middleware->expects($this->once())
+            ->method('getActionResolverMiddleware')
+            ->with([], self::$routingResultAttribute);
+
+        $middleware->__invoke(new ServerRequest(), new Response());
+    }
+
+    /**
+     * @test
+     */
+    public function invokeCreatesActionExecutorMiddleware()
+    {
+        // Get mock, without the constructor being called
+        $middleware = $this->getMockedAdroitMiddleware();
+
+        // set expectations for constructor calls
+        $middleware->expects($this->once())
+            ->method('getActionExecutorMiddleware')
+            ->with(Action::class, Payload::class);
+
+        $middleware->__invoke(new ServerRequest(), new Response());
+    }
+
+    /**
+     * @test
+     */
+    public function invokeCreatesResponderResolverMiddleware()
+    {
+        // Get mock, without the constructor being called
+        $middleware = $this->getMockedAdroitMiddleware();
+
+        // set expectations for constructor calls
+        $middleware->expects($this->once())
+            ->method('getResponderResolverMiddleware')
+            ->with([], Payload::class, Responder::class);
+
+        $middleware->__invoke(new ServerRequest(), new Response());
+    }
+
+    /**
+     * @test
+     */
+    public function invokeCreatesResponderExecutorMiddleware()
+    {
+        // Get mock, without the constructor being called
+        $middleware = $this->getMockedAdroitMiddleware();
+
+        // set expectations for constructor calls
+        $middleware->expects($this->once())
+            ->method('getResponderExecutorMiddleware')
+            ->with(Responder::class, Payload::class);
+
+        $middleware->__invoke(new ServerRequest(), new Response());
+    }
+
+    /**
+     * @test
+     */
+    public function createsWorkingMiddlewaresAndPipesCorrectOrder()
+    {
+        $expectedMiddlewares = [
+            ActionResolverMiddleware::class,
+            ActionExecutorMiddleware::class,
+            ResponderResolverMiddleware::class,
+            ResponderExecutorMiddleware::class
+        ];
+
+        $pipedMiddlewares = [];
+
+        $middleware = $this->getMockedAdroitMiddleware(true);
+        $middleware->expects($this->any())
+            ->method('pipe')
+            ->will($this->returnCallback(function ($middleware) use (&$pipedMiddlewares) {
+                $pipedMiddlewares[] = get_class($middleware);
+            }));
+
+        $middleware->__invoke(new ServerRequest(), new Response());
+        $this->assertSame($expectedMiddlewares, $pipedMiddlewares);
+    }
+
+    /**
+     * @test
+     */
+    public function createCreatesMiddlewareWithDefaultMiddlewares()
+    {
+        $middleware = AdroitMiddleware::create('routing', [], []);
         $this->assertInstanceOf(AdroitMiddleware::class, $middleware);
     }
 

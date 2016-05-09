@@ -28,8 +28,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     /**
      * @var string
      */
-    protected static $domainPayloadAttribute = 'domainPayload';
-
+    protected static $actionAttribute = 'action';
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject[]
      */
@@ -52,7 +51,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->request =  (new ServerRequest())->withAttribute(self::$routingResultAttribute, 'action');
+        $this->request =  (new ServerRequest())->withAttribute(self::$routingResultAttribute, 'actionToken');
         $this->response = new Response();
         $this->resolvers = [
             $this->getMockForAbstractClass(ActionResolver::class),
@@ -62,7 +61,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $this->middleware = new ActionResolverMiddleware(
             $this->resolvers,
             self::$routingResultAttribute,
-            self::$domainPayloadAttribute
+            self::$actionAttribute
         );
     }
 
@@ -136,19 +135,10 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $middleware = new ActionResolverMiddleware(
             $resolvers,
             self::$routingResultAttribute,
-            self::$domainPayloadAttribute
+            self::$actionAttribute
         );
 
         $middleware->__invoke($this->request, $this->response);
-    }
-
-    /**
-     * @test
-     */
-    public function returnsTheCorrectDomainPayloadAttribute()
-    {
-        $attribute = $this->middleware->getDomainPayloadAttribute();
-        $this->assertEquals(self::$domainPayloadAttribute, $attribute);
     }
 
     /**
@@ -164,7 +154,7 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function callsNextMiddlewareIfPresentAndActionCouldBeExecuted()
+    public function callsNextMiddlewareIfPresentAndActionCouldBeResolved()
     {
         $called = false;
         $next = function (
@@ -183,23 +173,6 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $this->middleware->__invoke($this->request, $this->response, $next);
 
         $this->assertTrue($called);
-    }
-
-    /**
-     * @test
-     * @expectedException \bitExpert\Adroit\Action\ActionExecutionException
-     */
-    public function throwsExceptionIfReturnedTypeIsInvalid()
-    {
-        $firstResolver = $this->resolvers[0];
-
-        $firstResolver->expects($this->once())
-            ->method('resolve')
-            ->will($this->returnValue(function () {
-                
-            }));
-
-        $this->middleware->__invoke($this->request, $this->response);
     }
 
     /**

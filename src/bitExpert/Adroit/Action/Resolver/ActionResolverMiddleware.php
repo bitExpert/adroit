@@ -10,17 +10,14 @@
  */
 namespace bitExpert\Adroit\Action\Resolver;
 
-use bitExpert\Adroit\Action\ActionMiddleware;
-use bitExpert\Adroit\Domain\Payload;
 use bitExpert\Adroit\Resolver\AbstractResolverMiddleware;
 use bitExpert\Adroit\Resolver\ResolveException;
 use bitExpert\Adroit\Action\ActionExecutionException;
 use bitExpert\Adroit\Resolver\Resolver;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use bitExpert\Adroit\Action\Resolver\ActionResolver;
 
-class ActionResolverMiddleware extends AbstractResolverMiddleware implements ActionMiddleware
+class ActionResolverMiddleware extends AbstractResolverMiddleware
 {
     /**
      * @var string
@@ -29,20 +26,20 @@ class ActionResolverMiddleware extends AbstractResolverMiddleware implements Act
     /**
      * @var string
      */
-    protected $domainPayloadAttribute;
+    protected $actionAttribute;
 
     /**
-     * @param ActionResolver|ActionResolver[] $resolvers
-     * @param $routingResultAttribute
-     * @param $domainPayloadAttribute
+     * @param ActionResolver[] $resolvers
+     * @param string $actionAttribute
+     * @param string $routingResultAttribute
      * @throws \InvalidArgumentException
      */
-    public function __construct($resolvers, $routingResultAttribute, $domainPayloadAttribute)
+    public function __construct(array $resolvers, $routingResultAttribute, $actionAttribute)
     {
         parent::__construct($resolvers);
 
+        $this->actionAttribute = $actionAttribute;
         $this->routingResultAttribute = $routingResultAttribute;
-        $this->domainPayloadAttribute = $domainPayloadAttribute;
     }
 
     /**
@@ -60,31 +57,11 @@ class ActionResolverMiddleware extends AbstractResolverMiddleware implements Act
         }
 
 
-        // execute the action
-        $responseOrPayload = $action($request, $response);
-        
-        if (!($responseOrPayload instanceof Payload) && !($responseOrPayload instanceof ResponseInterface)) {
-            throw new ActionExecutionException(sprintf(
-                'The action "%s" did neither return an instance of "%s" nor an instance of "%s"',
-                $this->getRepresentation($action),
-                Payload::class,
-                ResponseInterface::class
-            ));
-        }
-
         if ($next) {
-            $response = $next($request->withAttribute($this->domainPayloadAttribute, $responseOrPayload), $response);
+            $response = $next($request->withAttribute($this->actionAttribute, $action), $response);
         }
 
         return $response;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getDomainPayloadAttribute()
-    {
-        return $this->domainPayloadAttribute;
     }
 
     /**

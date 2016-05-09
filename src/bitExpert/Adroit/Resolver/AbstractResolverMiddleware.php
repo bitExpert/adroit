@@ -39,10 +39,10 @@ abstract class AbstractResolverMiddleware
     /**
      * Internal resolver setter which validates the resolvers
      *
-     * @param $resolvers
+     * @param \bitExpert\Adroit\Resolver\Resolver[] $resolvers
      * @throws \InvalidArgumentException
      */
-    private function validateResolvers($resolvers)
+    private function validateResolvers(array $resolvers)
     {
         foreach ($resolvers as $index => $resolver) {
             if (!$this->isValidResolver($resolver)) {
@@ -103,14 +103,15 @@ abstract class AbstractResolverMiddleware
     protected function resolve(ServerRequestInterface $request)
     {
         $identifier = $this->getIdentifier($request);
-        $identifierName = $this->getRepresentation($identifier);
         $resolvers = $this->getApplicableResolvers($request);
+
+        $identifierName = is_object($identifier) ? get_class($identifier) : (string) $identifier;
 
         $this->validateResolvers($resolvers);
 
         foreach ($resolvers as $index => $resolver) {
             $resolved = $resolver->resolve($identifier);
-            $resolvedName = $this->getRepresentation($resolved);
+            $resolvedName = is_object($resolved) ? get_class($resolved) : (string) $resolved;
 
             if (!$this->isValidResult($resolved)) {
                 // step out of the loop when an action could be found
@@ -158,20 +159,5 @@ abstract class AbstractResolverMiddleware
     protected function getApplicableResolvers(ServerRequestInterface $request)
     {
         return $this->resolvers;
-    }
-
-    /**
-     * Returns a string representation according to the given param's type
-     *
-     * @param $obj
-     * @return string
-     */
-    protected function getRepresentation($obj)
-    {
-        if (is_object($obj)) {
-            return get_class($obj);
-        } else {
-            return (string) $obj;
-        }
     }
 }

@@ -25,6 +25,10 @@ class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      * @var string
      */
     protected static $domainPayloadAttribute = 'domainPayload';
+    /**
+     * @var string
+     */
+    protected static $responderAttribute = 'responder';
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject[]
@@ -47,7 +51,8 @@ class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
         $this->middleware = new ResponderResolverMiddleware(
             $this->resolvers,
-            self::$domainPayloadAttribute
+            self::$domainPayloadAttribute,
+            self::$responderAttribute
         );
     }
 
@@ -194,21 +199,6 @@ class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
         $this->middleware->__invoke($request, new Response(), $next);
         $this->assertTrue($called);
-    }
-
-    /**
-     * @test
-     * @expectedException \bitExpert\Adroit\Responder\ResponderExecutionException
-     */
-    public function throwsExceptionIfResponderDoesNotReturnAResponse()
-    {
-        $this->resolvers[0]->expects($this->once())
-            ->method('resolve')
-            ->will($this->returnValue(function () {
-
-            }));
-
-        $this->middleware->__invoke(new ServerRequest(), new Response());
     }
 
     /**

@@ -10,11 +10,17 @@
  */
 namespace bitExpert\Adroit;
 
-use bitExpert\Adroit\Action\ActionMiddleware;
-use bitExpert\Adroit\Domain\Payload;
+use bitExpert\Adroit\Action\Action;
 use bitExpert\Adroit\Action\Resolver\ActionResolverMiddleware;
+use bitExpert\Adroit\Action\Resolver\DefaultActionResolverMiddleware;
+use bitExpert\Adroit\Action\Executor\ActionExecutorMiddleware;
+use bitExpert\Adroit\Action\Executor\DefaultActionExecutorMiddleware;
 use bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware;
-use bitExpert\Adroit\Responder\ResponderMiddleware;
+use bitExpert\Adroit\Responder\Resolver\DefaultResponderResolverMiddleware;
+use bitExpert\Adroit\Responder\Executor\ResponderExecutorMiddleware;
+use bitExpert\Adroit\Responder\DefaultResponderExecutorMiddleware;
+use bitExpert\Adroit\Responder\Responder;
+use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Stratigility\MiddlewarePipe;
@@ -26,45 +32,60 @@ use Zend\Stratigility\MiddlewarePipe;
  */
 class AdroitMiddleware extends MiddlewarePipe
 {
+    protected static $actionAttribute = Action::class;
+    protected static $payloadAttribute = Payload::class;
+    protected static $responderAttribute = Responder::class;
+
+    /**
+     * @var string
+     */
+    protected $routingResultAttribute;
+    /**
+     * @var \bitExpert\Adroit\Action\ActionResolver|
+     */
+    protected $actionResolvers;
+    /**
+     * @var
+     */
+    protected $responderResolvers;
     /**
      * @var callable[]
      */
-    protected $beforeActionMiddlewares;
+    protected $beforeActionResolverMiddlewares;
     /**
      * @var callable[]
      */
-    protected $beforeResponderMiddlewares;
+    protected $beforeActionExecutorMiddlewares;
     /**
      * @var callable[]
      */
-    protected $afterResponderMiddlewares;
+    protected $beforeResponderResolverMiddlewares;
     /**
-     * @var callable
+     * @var callable[]
      */
-    protected $actionMiddleware;
-    /**
-     * @var callable
-     */
-    protected $responderMiddleware;
+    protected $beforeResponderExecutorMiddlewares;
+
+
+    protected $actionResolverMiddleware;
+    protected $actionExecutorMiddleware;
+    protected $responderResolverMiddleware;
+    protected $responderExecutorMiddleware;
 
     /**
      * Creates a new {\bitExpert\Adroit\AdroitMiddleware}.
-     *
-     * @param ActionMiddleware $actionMiddleware
-     * @param ResponderMiddleware $responderMiddleware
      */
-    public function __construct(
-        ActionMiddleware $actionMiddleware,
-        ResponderMiddleware $responderMiddleware
-    ) {
+    public function __construct($routingResultAttribute, array $actionResolvers, array $responderResolvers)
+    {
         parent::__construct();
 
-        $this->actionMiddleware = $actionMiddleware;
-        $this->responderMiddleware = $responderMiddleware;
+        $this->routingResultAttribute = $routingResultAttribute;
+        $this->actionResolvers = $actionResolvers;
+        $this->responderResolvers = $responderResolvers;
 
-        $this->beforeActionMiddlewares = [];
-        $this->beforeResponderMiddlewares = [];
-        $this->afterResponderMiddlewares = [];
+        $this->beforeActionResolverMiddlewares = [];
+        $this->beforeActionExecutorMiddlewares = [];
+        $this->beforeResponderResolverMiddlewares = [];
+        $this->beforeResponderExecutorMiddlewares = [];
     }
 
 
@@ -75,9 +96,22 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param callable $middleware
      * @return $this
      */
-    public function beforeAction(callable $middleware)
+    public function beforeResolveAction(callable $middleware)
     {
-        $this->beforeActionMiddlewares[] = $middleware;
+        $this->beforeActionResolverMiddlewares[] = $middleware;
+        return $this;
+    }
+
+    /**
+     * Adds the given middleware to the pipe before the action middleware
+     * (chainable)
+     *
+     * @param callable $middleware
+     * @return $this
+     */
+    public function beforeExecuteAction(callable $middleware)
+    {
+        $this->beforeActionExecutorMiddlewares[] = $middleware;
         return $this;
     }
 
@@ -88,22 +122,22 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param callable $middleware
      * @return $this
      */
-    public function beforeResponder(callable $middleware)
+    public function beforeResolveResponder(callable $middleware)
     {
-        $this->beforeResponderMiddlewares[] = $middleware;
+        $this->beforeResponderResolverMiddlewares[] = $middleware;
         return $this;
     }
 
     /**
-     * Adds the given middleware to the pipe after the responder middleware
+     * Adds the given middleware to the pipe after the action middleware and before the responder middleware
      * (chainable)
      *
      * @param callable $middleware
      * @return $this
      */
-    public function afterResponder(callable $middleware)
+    public function beforeExecuteResponder(callable $middleware)
     {
-        $this->afterResponderMiddlewares[] = $middleware;
+        $this->beforeResponderExecutorMiddlewares[] = $middleware;
         return $this;
     }
 
@@ -134,11 +168,78 @@ class AdroitMiddleware extends MiddlewarePipe
      */
     protected function initialize()
     {
-        $this->pipeEach($this->beforeActionMiddlewares);
-        $this->pipe($this->actionMiddleware);
-        $this->pipeEach($this->beforeResponderMiddlewares);
-        $this->pipe($this->responderMiddleware);
-        $this->pipeEach($this->afterResponderMiddlewares);
+        $actionResolverMiddleware = $this->getActionResolverMiddleware(
+            $this->actionResolvers,
+            $this->routingResultAttribute,
+            self::$actionAttribute
+        );
+
+        $actionExecutorMiddleware = $this->getActionExecutorMiddleware(
+            self::$actionAttribute,
+            self::$payloadAttribute
+        );
+
+        $responderResolverMiddleware = $this->getResponderResolverMiddleware(
+            $this->responderResolvers,
+            self::$payloadAttribute,
+            self::$responderAttribute
+        );
+
+        $responderExecutorMiddleware = $this->getResponderExecutorMiddleware(
+            self::$responderAttribute,
+            self::$payloadAttribute
+        );
+
+        $this->pipeEach($this->beforeActionResolverMiddlewares);
+        $this->pipe($actionResolverMiddleware);
+        $this->pipeEach($this->beforeActionExecutorMiddlewares);
+        $this->pipe($actionExecutorMiddleware);
+        $this->pipeEach($this->beforeResponderResolverMiddlewares);
+        $this->pipe($responderResolverMiddleware);
+        $this->pipeEach($this->beforeResponderExecutorMiddlewares);
+        $this->pipe($responderExecutorMiddleware);
+    }
+
+    /**
+     * @param \bitExpert\Adroit\Action\Resolver\ActionResolver[] $actionResolvers
+     * @param string $routingResultAttribute
+     * @param string $actionAttribute
+     * @return ActionResolverMiddleware
+     */
+    protected function getActionResolverMiddleware($actionResolvers, $routingResultAttribute, $actionAttribute)
+    {
+        return new ActionResolverMiddleware($actionResolvers, $routingResultAttribute, $actionAttribute);
+    }
+
+    /**
+     * @param string $actionAttribute
+     * @param string $payloadAttribute
+     * @return ActionExecutorMiddleware
+     */
+    protected function getActionExecutorMiddleware($actionAttribute, $payloadAttribute)
+    {
+        return new ActionExecutorMiddleware($actionAttribute, $payloadAttribute);
+    }
+
+    /**
+     * @param \bitExpert\Adroit\Responder\Resolver\ResponderResolver[] $responderResolvers
+     * @param string $payloadAttribute
+     * @param string $responderAttribute
+     * @return ResponderResolverMiddleware
+     */
+    protected function getResponderResolverMiddleware($responderResolvers, $payloadAttribute, $responderAttribute)
+    {
+        return new ResponderResolverMiddleware($responderResolvers, $payloadAttribute, $responderAttribute);
+    }
+
+    /**
+     * @param string $responderAttribute
+     * @param string $payloadAttribute
+     * @return ResponderExecutorMiddleware
+     */
+    protected function getResponderExecutorMiddleware($responderAttribute, $payloadAttribute)
+    {
+        return new ResponderExecutorMiddleware($responderAttribute, $payloadAttribute);
     }
 
     /**
@@ -147,14 +248,10 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param String $routingResultAttribute
      * @param \bitExpert\Adroit\Action\Resolver\ActionResolver[] $actionResolvers
      * @param \bitExpert\Adroit\Responder\Resolver\ResponderResolver[] $responderResolvers
-     * @param $responderResolvers
-     * @return static
+     * @return AdroitMiddleware
      */
-    public static function createDefault($routingResultAttribute, array $actionResolvers, array $responderResolvers)
+    public static function create($routingResultAttribute, array $actionResolvers, array $responderResolvers)
     {
-        $actionMiddleware = new ActionResolverMiddleware($actionResolvers, $routingResultAttribute, Payload::class);
-        $responderMiddleware = new ResponderResolverMiddleware($responderResolvers, Payload::class);
-
-        return new static($actionMiddleware, $responderMiddleware);
+        return new static($routingResultAttribute, $actionResolvers, $responderResolvers);
     }
 }

@@ -19,23 +19,29 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use bitExpert\Adroit\Responder\Resolver\ResponderResolver;
 
-class ResponderResolverMiddleware extends AbstractResolverMiddleware implements ResponderMiddleware
+class ResponderResolverMiddleware extends AbstractResolverMiddleware
 {
+    /**
+     * @var string
+     */
+    protected $responderAttribute;
     /**
      * @var string
      */
     protected $domainPayloadAttribute;
 
     /**
-     * @param ResponderResolver|ResponderResolver[] $resolvers
+     * @param ResponderResolver[] $resolvers
      * @param string $domainPayloadAttribute
+     * @param string $responderAttribute
      * @throws \InvalidArgumentException
      */
-    public function __construct($resolvers, $domainPayloadAttribute)
+    public function __construct(array $resolvers, $domainPayloadAttribute, $responderAttribute)
     {
         parent::__construct($resolvers);
 
         $this->domainPayloadAttribute = $domainPayloadAttribute;
+        $this->responderAttribute = $responderAttribute;
     }
 
     /**
@@ -52,7 +58,7 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware implements 
             $response = $domainPayload;
 
             if ($next) {
-                $response = $next($request, $response);
+                $response = $next($request->withAttribute($this->responderAttribute, $response), $response);
             }
 
             return $response;
@@ -64,18 +70,8 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware implements 
             throw new ResponderResolveException('None of given resolvers could resolve a responder', $e->getCode(), $e);
         }
 
-        $response = $responder($domainPayload, $response);
-        
-        if (!($response instanceof ResponseInterface)) {
-            throw new ResponderExecutionException(sprintf(
-                'The responder "%s" did not return an instance of "%s"',
-                $this->getRepresentation($responder),
-                ResponseInterface::class
-            ));
-        }
-
         if ($next) {
-            $response = $next($request, $response);
+            $response = $next($request->withAttribute($this->responderAttribute, $responder), $response);
         }
 
         return $response;

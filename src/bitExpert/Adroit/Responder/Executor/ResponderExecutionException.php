@@ -8,13 +8,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace bitExpert\Adroit\Action;
+namespace bitExpert\Adroit\Responder\Executor;
 
 /**
- * ActionExecutionException represents an exception being thrown after an action is executed
- * and the return type is not valid
+ * ResponderExecutionException represents an exception being thrown during or after a responder is executed
  */
-class ActionExecutionException extends \RuntimeException
+class ResponderExecutionException extends \RuntimeException
 {
 
 }
