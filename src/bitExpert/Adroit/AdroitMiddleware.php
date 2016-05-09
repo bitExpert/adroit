@@ -12,13 +12,9 @@ namespace bitExpert\Adroit;
 
 use bitExpert\Adroit\Action\Action;
 use bitExpert\Adroit\Action\Resolver\ActionResolverMiddleware;
-use bitExpert\Adroit\Action\Resolver\DefaultActionResolverMiddleware;
 use bitExpert\Adroit\Action\Executor\ActionExecutorMiddleware;
-use bitExpert\Adroit\Action\Executor\DefaultActionExecutorMiddleware;
 use bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware;
-use bitExpert\Adroit\Responder\Resolver\DefaultResponderResolverMiddleware;
 use bitExpert\Adroit\Responder\Executor\ResponderExecutorMiddleware;
-use bitExpert\Adroit\Responder\DefaultResponderExecutorMiddleware;
 use bitExpert\Adroit\Responder\Responder;
 use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
@@ -41,11 +37,11 @@ class AdroitMiddleware extends MiddlewarePipe
      */
     protected $routingResultAttribute;
     /**
-     * @var \bitExpert\Adroit\Action\ActionResolver|
+     * @var \bitExpert\Adroit\Action\Resolver\ActionResolver[]
      */
     protected $actionResolvers;
     /**
-     * @var
+     * @var \bitExpert\Adroit\Responder\Resolver\ResponderResolver[]
      */
     protected $responderResolvers;
     /**
@@ -65,14 +61,12 @@ class AdroitMiddleware extends MiddlewarePipe
      */
     protected $beforeResponderExecutorMiddlewares;
 
-
-    protected $actionResolverMiddleware;
-    protected $actionExecutorMiddleware;
-    protected $responderResolverMiddleware;
-    protected $responderExecutorMiddleware;
-
     /**
-     * Creates a new {\bitExpert\Adroit\AdroitMiddleware}.
+     * AdroitMiddleware constructor.
+     *
+     * @param string $routingResultAttribute
+     * @param \bitExpert\Adroit\Action\Resolver\ActionResolver[] $actionResolvers
+     * @param \bitExpert\Adroit\Responder\Resolver\ResponderResolver[] $responderResolvers
      */
     public function __construct($routingResultAttribute, array $actionResolvers, array $responderResolvers)
     {
@@ -240,18 +234,5 @@ class AdroitMiddleware extends MiddlewarePipe
     protected function getResponderExecutorMiddleware($responderAttribute, $payloadAttribute)
     {
         return new ResponderExecutorMiddleware($responderAttribute, $payloadAttribute);
-    }
-
-    /**
-     * Creates a {@link bitExpert\Adroit\AdroitMiddleware using the default ADR middlewares
-     *
-     * @param String $routingResultAttribute
-     * @param \bitExpert\Adroit\Action\Resolver\ActionResolver[] $actionResolvers
-     * @param \bitExpert\Adroit\Responder\Resolver\ResponderResolver[] $responderResolvers
-     * @return AdroitMiddleware
-     */
-    public static function create($routingResultAttribute, array $actionResolvers, array $responderResolvers)
-    {
-        return new static($routingResultAttribute, $actionResolvers, $responderResolvers);
     }
 }

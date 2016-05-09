@@ -369,15 +369,6 @@ class AdroitMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @test
-     */
-    public function createCreatesMiddlewareWithDefaultMiddlewares()
-    {
-        $middleware = AdroitMiddleware::create('routing', [], []);
-        $this->assertInstanceOf(AdroitMiddleware::class, $middleware);
-    }
-
-    /**
      * Returns a middleware. You may define an additional callable which will be executed in front of
      * the default behavior for testing purpose (e.g. testing call order)
      *
