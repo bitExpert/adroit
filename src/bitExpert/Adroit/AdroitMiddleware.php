@@ -11,29 +11,31 @@
 namespace bitExpert\Adroit;
 
 use bitExpert\Adroit\Action\Action;
-use bitExpert\Adroit\Action\Resolver\ActionResolver;
-use bitExpert\Adroit\Domain\DomainPayloadInterface;
-use bitExpert\Adroit\Responder\Resolver\ResponderResolver;
+use bitExpert\Adroit\Action\Resolver\ActionResolverMiddleware;
+use bitExpert\Adroit\Action\Executor\ActionExecutorMiddleware;
+use bitExpert\Adroit\Responder\Resolver\ResponderResolverMiddleware;
+use bitExpert\Adroit\Responder\Executor\ResponderExecutorMiddleware;
 use bitExpert\Adroit\Responder\Responder;
-use bitExpert\Pathfinder\Router;
-use bitExpert\Pathfinder\RoutingResult;
-use bitExpert\Slf4PsrLog\LoggerFactory;
+use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use RuntimeException;
-use Zend\Stratigility\MiddlewareInterface;
+use Zend\Stratigility\MiddlewarePipe;
 
 /**
- * MiddlewareInterface implementation for the Adroit framework.
+ * MiddlewarePipe implementation for an Adroit web application.
  *
  * @api
  */
-class AdroitMiddleware implements MiddlewareInterface
+class AdroitMiddleware extends MiddlewarePipe
 {
+    protected static $actionAttribute = Action::class;
+    protected static $payloadAttribute = Payload::class;
+    protected static $responderAttribute = Responder::class;
+
     /**
-     * @var \Psr\Log\LoggerInterface the logger instance.
+     * @var string
      */
-    protected $logger;
+    protected $routingResultAttribute;
     /**
      * @var \bitExpert\Adroit\Action\Resolver\ActionResolver[]
      */
@@ -43,194 +45,194 @@ class AdroitMiddleware implements MiddlewareInterface
      */
     protected $responderResolvers;
     /**
-     * @var \bitExpert\Pathfinder\Router
+     * @var callable[]
      */
-    protected $router;
+    protected $beforeActionResolverMiddlewares;
+    /**
+     * @var callable[]
+     */
+    protected $beforeActionExecutorMiddlewares;
+    /**
+     * @var callable[]
+     */
+    protected $beforeResponderResolverMiddlewares;
+    /**
+     * @var callable[]
+     */
+    protected $beforeResponderExecutorMiddlewares;
 
     /**
-     * Creates a new {@link \bitExpert\Adroit\AdroitMiddleware}.
+     * AdroitMiddleware constructor.
      *
+     * @param string $routingResultAttribute
      * @param \bitExpert\Adroit\Action\Resolver\ActionResolver[] $actionResolvers
      * @param \bitExpert\Adroit\Responder\Resolver\ResponderResolver[] $responderResolvers
-     * @param Router $router
      */
-    public function __construct(array $actionResolvers, array $responderResolvers, Router $router)
+    public function __construct($routingResultAttribute, array $actionResolvers, array $responderResolvers)
     {
+        parent::__construct();
+
+        $this->routingResultAttribute = $routingResultAttribute;
         $this->actionResolvers = $actionResolvers;
         $this->responderResolvers = $responderResolvers;
-        $this->router = $router;
 
-        $this->logger = LoggerFactory::getLogger(__CLASS__);
+        $this->beforeActionResolverMiddlewares = [];
+        $this->beforeActionExecutorMiddlewares = [];
+        $this->beforeResponderResolverMiddlewares = [];
+        $this->beforeResponderExecutorMiddlewares = [];
     }
 
 
     /**
-     * {@inheritdoc}
-     * @throws \RuntimeException
+     * Adds the given middleware to the pipe before the action middleware
+     * (chainable)
+     *
+     * @param callable $middleware
+     * @return $this
+     */
+    public function beforeResolveAction(callable $middleware)
+    {
+        $this->beforeActionResolverMiddlewares[] = $middleware;
+        return $this;
+    }
+
+    /**
+     * Adds the given middleware to the pipe before the action middleware
+     * (chainable)
+     *
+     * @param callable $middleware
+     * @return $this
+     */
+    public function beforeExecuteAction(callable $middleware)
+    {
+        $this->beforeActionExecutorMiddlewares[] = $middleware;
+        return $this;
+    }
+
+    /**
+     * Adds the given middleware to the pipe after the action middleware and before the responder middleware
+     * (chainable)
+     *
+     * @param callable $middleware
+     * @return $this
+     */
+    public function beforeResolveResponder(callable $middleware)
+    {
+        $this->beforeResponderResolverMiddlewares[] = $middleware;
+        return $this;
+    }
+
+    /**
+     * Adds the given middleware to the pipe after the action middleware and before the responder middleware
+     * (chainable)
+     *
+     * @param callable $middleware
+     * @return $this
+     */
+    public function beforeExecuteResponder(callable $middleware)
+    {
+        $this->beforeResponderExecutorMiddlewares[] = $middleware;
+        return $this;
+    }
+
+
+    /**
+     * @inheritdoc
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $out = null)
     {
-        $this->logger->debug('Handling new request...');
+        $this->initialize();
+        return parent::__invoke($request, $response, $out);
+    }
 
-        $result = $this->resolveRoutingResult($request);
-
-        if (!$result->hasTarget()) {
-            $message = 'No action could be determined for the current request';
-            $response->getBody()->rewind();
-            $response->getBody()->write($message);
-            $response->getBody()->rewind();
-            $response = $response->withStatus(404);
-            return $response;
+    /**
+     * Pipes all given middlewares
+     * @param callable[] $middlewares
+     */
+    protected function pipeEach(array $middlewares)
+    {
+        foreach ($middlewares as $middleware) {
+            $this->pipe($middleware);
         }
+    }
 
-        $action = $this->resolveAction($result->getTarget());
-
-        // inject params determined by the router into the request
-        $request = $this->injectParams($request, $result->getParams());
-
-        // execute the action
-        $responseOrPayload = $action->prepareAndExecute($request, $response);
-
-        // if the return value is a response instance, directly return it
-        if ($responseOrPayload instanceof ResponseInterface) {
-            $this->logger->debug('Received response. Returning directly.');
-            return $responseOrPayload;
-        }
-
-        // if the return value is a ModelAndResponder instance, resolve the
-        // responder and
-        if ($responseOrPayload instanceof DomainPayloadInterface) {
-            $this->logger->debug('Received domain payload. Need a responder...');
-            $responder = $this->resolveResponder($request, $responseOrPayload);
-            return $responder->buildResponse($responseOrPayload, $response);
-        }
-
-        $message = sprintf(
-            'Action "%s" returned wrong type. Expected \Psr\Http\Message\ResponseInterface or ' .
-            '\bitExpert\Adroit\Domain\DomainPayload but got %s',
-            get_class($action),
-            is_object($responseOrPayload) ? get_class($responseOrPayload) : gettype($responseOrPayload)
+    /**
+     * Initializes the application by piping the fixed middlewares (routing, action, responder)
+     * and the configured middlewares in the right order
+     */
+    protected function initialize()
+    {
+        $actionResolverMiddleware = $this->getActionResolverMiddleware(
+            $this->actionResolvers,
+            $this->routingResultAttribute,
+            self::$actionAttribute
         );
 
-        $this->logger->error($message);
-        $response->getBody()->rewind();
-        $response->getBody()->write($message);
-        $response->getBody()->rewind();
-        $response = $response->withStatus(500);
-        return $response->withHeader('Content-Type', 'application/html');
+        $actionExecutorMiddleware = $this->getActionExecutorMiddleware(
+            self::$actionAttribute,
+            self::$payloadAttribute
+        );
+
+        $responderResolverMiddleware = $this->getResponderResolverMiddleware(
+            $this->responderResolvers,
+            self::$payloadAttribute,
+            self::$responderAttribute
+        );
+
+        $responderExecutorMiddleware = $this->getResponderExecutorMiddleware(
+            self::$responderAttribute,
+            self::$payloadAttribute
+        );
+
+        $this->pipeEach($this->beforeActionResolverMiddlewares);
+        $this->pipe($actionResolverMiddleware);
+        $this->pipeEach($this->beforeActionExecutorMiddlewares);
+        $this->pipe($actionExecutorMiddleware);
+        $this->pipeEach($this->beforeResponderResolverMiddlewares);
+        $this->pipe($responderResolverMiddleware);
+        $this->pipeEach($this->beforeResponderExecutorMiddlewares);
+        $this->pipe($responderExecutorMiddleware);
     }
 
     /**
-     * Lets perform the router and returns a {@link \bitExpert\Pathfinder\RoutingResult} for the given $request.
-     *
-     * @param ServerRequestInterface $request
-     * @return RoutingResult
+     * @param \bitExpert\Adroit\Action\Resolver\ActionResolver[] $actionResolvers
+     * @param string $routingResultAttribute
+     * @param string $actionAttribute
+     * @return ActionResolverMiddleware
      */
-    protected function resolveRoutingResult(ServerRequestInterface $request)
+    protected function getActionResolverMiddleware($actionResolvers, $routingResultAttribute, $actionAttribute)
     {
-        return $this->router->match($request);
+        return new ActionResolverMiddleware($actionResolvers, $routingResultAttribute, $actionAttribute);
     }
 
     /**
-     * Injects given params to the given request and returns a new {@link \Psr\Http\Message\ServerRequestInterface}
-     *
-     * @param ServerRequestInterface $request
-     * @param array $params
-     * @return ServerRequestInterface
+     * @param string $actionAttribute
+     * @param string $payloadAttribute
+     * @return ActionExecutorMiddleware
      */
-    protected function injectParams(ServerRequestInterface $request, array $params = [])
+    protected function getActionExecutorMiddleware($actionAttribute, $payloadAttribute)
     {
-        $params = array_merge($request->getQueryParams(), $params);
-        // setting given params as query params
-        return $request->withQueryParams($params);
+        return new ActionExecutorMiddleware($actionAttribute, $payloadAttribute);
     }
 
     /**
-     * Tries to resolve an {@link \bitExpert\Adroit\Action\Action} instance by querying
-     * the $actionResolvers. In case no matching action instance could be found an
-     * exception gets thrown.
-     *
-     * @param $actionToken
-     * @return Action
-     * @throws RuntimeException
+     * @param \bitExpert\Adroit\Responder\Resolver\ResponderResolver[] $responderResolvers
+     * @param string $payloadAttribute
+     * @param string $responderAttribute
+     * @return ResponderResolverMiddleware
      */
-    protected function resolveAction($actionToken)
+    protected function getResponderResolverMiddleware($responderResolvers, $payloadAttribute, $responderAttribute)
     {
-        $this->logger->debug('Trying to resolve action...');
-
-        foreach ($this->actionResolvers as $index => $resolver) {
-            if (!$resolver instanceof ActionResolver) {
-                $this->logger->warning(sprintf(
-                    'Action resolver at index %s is an instance of class %s which does not implement ' .
-                    '\bitExpert\Adroit\Action\Resolver\ActionResolver. Skipped.',
-                    $index,
-                    get_class($resolver)
-                ));
-                continue;
-            }
-
-            $action = $resolver->resolve($actionToken);
-            if ($action instanceof Action) {
-                // step out of the loop when an action could be found
-                // by the resolver. First resolver wins!
-                $this->logger->debug(sprintf(
-                    'Resolved action %s via resolver %s',
-                    get_class($action),
-                    get_class($resolver)
-                ));
-                return $action;
-            }
-        }
-
-        $message = 'An action could not be resolved for the given token!';
-        $this->logger->error($message);
-        throw new RuntimeException($message);
+        return new ResponderResolverMiddleware($responderResolvers, $payloadAttribute, $responderAttribute);
     }
 
     /**
-     * Tries to resolve an {@link \bitExpert\Adroit\Responder\Responder} instance by querying
-     * the $responderResolvers. In case no matching action instance could be found an
-     * exception gets thrown.
-     *
-     * @param ServerRequestInterface $request
-     * @param DomainPayloadInterface $domainPayload
-     * @return Responder
-     * @throws RuntimeException
+     * @param string $responderAttribute
+     * @param string $payloadAttribute
+     * @return ResponderExecutorMiddleware
      */
-    protected function resolveResponder(ServerRequestInterface $request, DomainPayloadInterface $domainPayload)
+    protected function getResponderExecutorMiddleware($responderAttribute, $payloadAttribute)
     {
-        $this->logger->debug(sprintf(
-            'Trying to resolve responder for domainpayload of type %s...',
-            $domainPayload->getType()
-        ));
-
-        foreach ($this->responderResolvers as $index => $resolver) {
-            if (!$resolver instanceof ResponderResolver) {
-                $this->logger->warning(sprintf(
-                    'Action resolver at index %s is an instance of class %s which does not implement ' .
-                    '\bitExpert\Adroit\Action\Resolver\ActionResolver. Skipped.',
-                    $index,
-                    get_class($resolver)
-                ));
-                continue;
-            }
-
-            $responder = $resolver->resolve($request, $domainPayload);
-            if ($responder instanceof Responder) {
-                // step out of the loop when a responder could be found
-                // by the resolver. First resolver wins!
-                $this->logger->debug(sprintf(
-                    'Resolved responder %s via resolver %s',
-                    get_class($responder),
-                    get_class($resolver)
-                ));
-                return $responder;
-            }
-        }
-
-        throw new RuntimeException(sprintf(
-            'A responder for domainpayload of type "%s" could not be found! Check your configuration!',
-            $domainPayload->getType()
-        ));
+        return new ResponderExecutorMiddleware($responderAttribute, $payloadAttribute);
     }
 }

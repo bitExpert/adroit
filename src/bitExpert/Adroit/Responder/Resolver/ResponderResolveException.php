@@ -10,15 +10,12 @@
  */
 namespace bitExpert\Adroit\Responder\Resolver;
 
-use bitExpert\Adroit\Resolver\Resolver;
+use bitExpert\Adroit\Resolver\ResolveException;
 
 /**
- * A responder resolver will provide a {@link \bitExpert(Adriot\Action\Action} instance
- * for the given $actionToken,
- *
- * @api
+ * Resolve exception represents an exception being thrown during a responder resolver process
  */
-interface ResponderResolver extends Resolver
+class ResponderResolveException extends ResolveException
 {
 
 }

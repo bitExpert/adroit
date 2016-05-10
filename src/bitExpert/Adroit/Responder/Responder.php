@@ -10,7 +10,7 @@
  */
 namespace bitExpert\Adroit\Responder;
 
-use bitExpert\Adroit\Domain\DomainPayloadInterface;
+use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -19,6 +19,7 @@ use Psr\Http\Message\ResponseInterface;
  * view concept a responder is able to fully influence the HTTP response, e.g. can set custom headers
  * and such.
  *
+ * This interface is primarily meant for documentation use. You MAY use it but a callable will be fine, too.
  * @api
  */
 interface Responder
@@ -27,9 +28,9 @@ interface Responder
      * Build the response (e.g. render a view template, return a redirect response, ...).
      * Might throw a {@link RuntimeException} in case sth. goes wrong.
      *
-     * @param DomainPayloadInterface $domainPayload
+     * @param Payload $payload
      * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    public function buildResponse(DomainPayloadInterface $domainPayload, ResponseInterface $response);
+    public function __invoke(Payload $payload, ResponseInterface $response);
 }
