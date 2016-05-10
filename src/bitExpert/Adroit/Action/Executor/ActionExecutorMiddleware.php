@@ -12,6 +12,7 @@ namespace bitExpert\Adroit\Action\Executor;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use bitExpert\Adroit\Domain\Payload;
 
 class ActionExecutorMiddleware
 {
@@ -43,8 +44,16 @@ class ActionExecutorMiddleware
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
         $action = $this->getAction($request);
+
         if (!$action) {
             throw new ActionExecutionException('Could not find action in request');
+        }
+
+        if (!is_callable($action)) {
+            throw new ActionExecutionException(sprintf(
+                'Could not execute action "%s" because it is not callable',
+                is_object($action) ? get_class($action) : (string) $action
+            ));
         }
 
         $responseOrPayload = $action($request, $response);

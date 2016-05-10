@@ -10,6 +10,7 @@ namespace bitExpert\Adroit\Responder\Executor;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Response;
 
 class ResponderExecutorMiddleware
 {
@@ -25,16 +26,33 @@ class ResponderExecutorMiddleware
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
+        $responder = $this->getResponder($request);
+
+        if (!$responder) {
+            throw new ResponderExecutionException('Could not find responder in request');
+        }
+
+        if ($responder instanceof ResponseInterface) {
+            $response = $responder;
+
+            if ($next) {
+                $response = $next($request, $response);
+            }
+
+            return $response;
+        }
+
         $payload = $this->getPayload($request);
 
         if (!$payload) {
             throw new ResponderExecutionException('Could not find domain payload in request');
         }
 
-        $responder = $this->getResponder($request);
-
-        if (!$responder) {
-            throw new ResponderExecutionException('Could not find responder in request');
+        if (!is_callable($responder)) {
+            throw new ResponderExecutionException(sprintf(
+                'Could not execute responder because it is not callable',
+                is_object($responder) ? get_class($responder) : (string) $responder
+            ));
         }
 
         $response = $responder($payload, $response);

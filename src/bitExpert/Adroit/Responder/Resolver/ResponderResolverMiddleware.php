@@ -54,7 +54,7 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware
 
         // if the return value is a response instance, directly return it
         if ($domainPayload instanceof ResponseInterface) {
-            $this->logger->debug('Received response. Returning directly.');
+            $this->logger->debug('Received response. Skipping resolvers.');
             $response = $domainPayload;
 
             if ($next) {

@@ -101,6 +101,54 @@ class ResponderExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      * @test
      * @expectedException \bitExpert\Adroit\Responder\Executor\ResponderExecutionException
      */
+    public function throwsExceptionIfRResponderIsNotCallable()
+    {
+        $responder = 'notCallable';
+
+        $payload = $this->getMock(Payload::class);
+
+        $this->request = $this->request->withAttribute(self::$responderAttribute, $responder);
+        $this->request = $this->request->withAttribute(self::$payloadAttribute, $payload);
+        $this->middleware->__invoke($this->request, $this->response);
+    }
+
+    /**
+     * @test
+     */
+    public function returnsDirectlyIfResponderIsResponse()
+    {
+        $responder = new Response();
+        $this->request = $this->request->withAttribute(self::$responderAttribute, $responder);
+        $response = $this->middleware->__invoke($this->request, $this->response);
+        $this->assertSame($responder, $response);
+    }
+
+    /**
+     * @test
+     */
+    public function executesNextIfGivenAndResponderIsResponse()
+    {
+        $called = false;
+        $next = function (
+            ServerRequestInterface $request,
+            ResponseInterface $response,
+            callable $next = null
+        ) use (&$called) {
+            $called = true;
+            return $response;
+        };
+
+        $responder = new Response();
+        $this->request = $this->request->withAttribute(self::$responderAttribute, $responder);
+        $response = $this->middleware->__invoke($this->request, $this->response, $next);
+        $this->assertSame($responder, $response);
+        $this->assertTrue($called);
+    }
+
+    /**
+     * @test
+     * @expectedException \bitExpert\Adroit\Responder\Executor\ResponderExecutionException
+     */
     public function throwsExceptionIfResponderExecutionDoesNotReturnResponse()
     {
         $responder = $this->getMock(Responder::class, ['__invoke']);

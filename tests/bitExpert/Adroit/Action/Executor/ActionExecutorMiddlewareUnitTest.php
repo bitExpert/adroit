@@ -112,4 +112,16 @@ class ActionExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $request = $this->request->withAttribute(self::$actionAttribute, $action);
         $this->middleware->__invoke($request, $this->response);
     }
+
+    /**
+     * @test
+     * @expectedException \bitExpert\Adroit\Action\Executor\ActionExecutionException
+     */
+    public function throwsExceptionIfActionIsNotCallable()
+    {
+        $action = 'notCallable';
+
+        $request = $this->request->withAttribute(self::$actionAttribute, $action);
+        $this->middleware->__invoke($request, $this->response);
+    }
 }
