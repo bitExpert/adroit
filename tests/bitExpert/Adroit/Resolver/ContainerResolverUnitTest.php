@@ -153,4 +153,23 @@ class ContainerResolverUnitTest extends \PHPUnit_Framework_TestCase
         $resolved = $resolver->resolve($identifier);
         $this->assertSame($obj, $resolved);
     }
+
+    /**
+     * @test
+     */
+    public function willDirectlyReturnNullIfIdentifierIsNotAString()
+    {
+        $identifier = 1;
+
+        $resolver = new ContainerResolver($this->container);
+
+        $this->container->expects($this->never())
+            ->method('has');
+
+        $this->container->expects($this->never())
+            ->method('get');
+
+        $resolved = $resolver->resolve($identifier);
+        $this->assertNull($resolved);
+    }
 }

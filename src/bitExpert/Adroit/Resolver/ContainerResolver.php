@@ -62,6 +62,10 @@ class ContainerResolver extends AbstractMappingResolver
      */
     public function resolveMapped($identifier)
     {
+        if (!is_string($identifier)) {
+            return null;
+        }
+
         if (!$this->container->has($identifier)) {
             $this->logger->error(
                 sprintf(
