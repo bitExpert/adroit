@@ -129,4 +129,28 @@ class ContainerResolverUnitTest extends \PHPUnit_Framework_TestCase
         $resolved = $resolver->resolve($identifier);
         $this->assertNull($resolved);
     }
+
+    /**
+     * @test
+     */
+    public function directlyUsesIdentifierIfMappingsNotProvided()
+    {
+        $identifier = 'test';
+        $obj = new \stdClass();
+
+        $resolver = new ContainerResolver($this->container);
+
+        $this->container->expects($this->once())
+            ->method('has')
+            ->with($identifier)
+            ->will($this->returnValue(true));
+
+        $this->container->expects($this->once())
+            ->method('get')
+            ->with($identifier)
+            ->will($this->returnValue($obj));
+
+        $resolved = $resolver->resolve($identifier);
+        $this->assertSame($obj, $resolved);
+    }
 }
