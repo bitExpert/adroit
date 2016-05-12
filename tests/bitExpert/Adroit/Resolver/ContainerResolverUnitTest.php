@@ -78,20 +78,55 @@ class ContainerResolverUnitTest extends \PHPUnit_Framework_TestCase
      */
     public function returnsNullIfIdIsNull()
     {
-        $id = null;
+        $resolved = $this->resolver->resolve(null);
+        $this->assertNull($resolved);
+    }
+
+    /**
+     * @test
+     */
+    public function correctlyMapsIdentifiers()
+    {
+        $identifier = 'test';
+        $mappedIdentifier = 'mappedTest';
         $obj = new \stdClass();
+
+        $resolver = new ContainerResolver($this->container, [
+            $identifier => $mappedIdentifier
+        ]);
 
         $this->container->expects($this->once())
             ->method('has')
-            ->with($id)
+            ->with($mappedIdentifier)
             ->will($this->returnValue(true));
 
         $this->container->expects($this->once())
             ->method('get')
-            ->with($id)
+            ->with($mappedIdentifier)
             ->will($this->returnValue($obj));
 
-        $resolved = $this->resolver->resolve($id);
+        $resolved = $resolver->resolve($identifier);
         $this->assertSame($obj, $resolved);
+    }
+
+    /**
+     * @test
+     */
+    public function directlyReturnsNullIfMappingIsNotFound()
+    {
+        $identifier = 'test1';
+
+        $resolver = new ContainerResolver($this->container, [
+            'test' => 'mappedTest'
+        ]);
+
+        $this->container->expects($this->never())
+            ->method('has');
+
+        $this->container->expects($this->never())
+            ->method('get');
+
+        $resolved = $resolver->resolve($identifier);
+        $this->assertNull($resolved);
     }
 }

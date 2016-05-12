@@ -45,7 +45,7 @@ abstract class AbstractMappingResolver implements Resolver
      */
     public function resolve($identifier)
     {
-        $mappedIdentifier = $this->getMapping($identifier);
+        $mappedIdentifier = $this->map($identifier);
 
         if (!$mappedIdentifier) {
             $this->logger->warning(sprintf(
@@ -59,12 +59,12 @@ abstract class AbstractMappingResolver implements Resolver
     }
 
     /**
-     * Resolves the original identifier to the mapped one
+     * Maps the original identifier to the mapped one
      *
      * @param $identifier
      * @return mixed|null
      */
-    protected function getMapping($identifier)
+    protected function map($identifier)
     {
         if (!isset($this->mappings[$identifier])) {
             return null;

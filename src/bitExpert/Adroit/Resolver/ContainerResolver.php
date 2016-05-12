@@ -17,7 +17,7 @@ use Interop\Container\ContainerInterface;
  * Implementation of an {@link \bitExpert\Adroit\Resolver\Resolver} which will
  * pull the results from a "container-aware" service.
  */
-class ContainerResolver implements Resolver
+class ContainerResolver extends AbstractMappingResolver
 {
     /**
      * @var ContainerInterface
@@ -32,12 +32,27 @@ class ContainerResolver implements Resolver
      * Creates a new {@link \bitExpert\Adroit\Action\Resolver\ContainerAwareActionResolver}.
      *
      * @param ContainerInterface $container
+     * @param array $mappings
      * @throws \RuntimeException
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, array $mappings = [])
     {
+        parent::__construct($mappings);
+        
         $this->container = $container;
         $this->logger = LoggerFactory::getLogger(__CLASS__);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function map($identifier)
+    {
+        if (!count($this->mappings)) {
+            return $identifier;
+        }
+
+        return parent::map($identifier);
     }
 
     /**
@@ -45,7 +60,7 @@ class ContainerResolver implements Resolver
      * @throws \Interop\Container\Exception\ContainerException
      * @throws \Interop\Container\Exception\NotFoundException
      */
-    public function resolve($identifier)
+    public function resolveMapped($identifier)
     {
         if (!$this->container->has($identifier)) {
             $this->logger->error(
