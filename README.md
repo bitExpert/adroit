@@ -27,15 +27,14 @@ ActionResolver
 --------------
 
 As the name implies ActionResolvers are responsible for resolving an action class instance from the so-called actionToken.
-The actionToken is basically used to identify a route. Adroit comes with a default implementation of an ActionResolver 
-(\bitExpert\Adroit\Action\Resolver\ContainerAwareActionResolver) which uses any 
+The actionToken is basically used to identify a route. Adroit comes with a default implementation of an [ActionResolver](src/bitExpert/Adroit/Action/Resolver/ContainerActionResolver.php) which uses any 
 [container-interop](https://github.com/container-interop/container-interop) compatible DI container as a backend.
 
 Of course you may implement your own ActionResolvers using the (\bitExpert\Adroit\Action\ActionResolver) interface.
 
 ```php
 /** @var \Interop\Container\ContainerInterface $container */
-$actionResolver = new \bitExpert\Adroit\Action\Resolver\ContainerAwareActionResolver($container);
+$actionResolver = new \bitExpert\Adroit\Action\Resolver\ContainerActionResolver($container);
 ```
 
 ResponderResolver
@@ -46,14 +45,14 @@ $type defined in the DomainPayload instance. Adroit comes with a default impleme
 (\bitExpert\Adroit\Responder\Resolver\ContainerAwareResponderResolver) which uses any 
 [container-interop](https://github.com/container-interop/container-interop) compatible DI container as a backend.
 
-Of course you may implement your own ResponderResolvers using the (\bitExpert\Adroit\Responder\ResponderResolver) interface.
+Of course you may implement your own ResponderResolvers using the [ResponderResolver](src/bitExpert/Adroit/Responder/ResponderResolver.php) interface.
 
 ```php
 /** @var \Interop\Container\ContainerInterface $container */
 $responderResolver = new \bitExpert\Adroit\Responder\Resolver\ContainerAwareResponderResolver($container);
 ```
 
-Domain(Payload)
+(Domain)Payload
 ---------------
 You may define your own payload class(es) by implementing the \bitExpert\Adroit\Domain\Payload interface.
 This gives you the opportunity to freely define the payload according to your needs.
@@ -92,25 +91,15 @@ class CustomPayload implements Payload
 Actions
 -------
 
-Actions come in two flavours as well: The SimpleForwardAction (\bitExpert\Adroit\Action\SimpleForwardAction) which will
-always return the defined responder no matter what. In case you want to implement your own action logic (who does not 
-want that?) extend the \bitExpert\Adroit\Action\AbstractAction base class and simply implement the execute() method. In
-case you need some more customizations implement the \bitExpert\Adroit\Action\Action interface.
+In case you want to implement your own action logic (who does not want that?) you may use any callable following the signature of the [Action](src/bitExpert/Adroit/Action/Action.php) interface or create your own Action class and implement the interface. 
 
-You may also use simple Closures as Actions in case you need to implement something really fast.
+Action classes are allowed to either return an object which implements the [Payload](src/bitExpert/Adroit/Domain/Payload.php) interface or an PSR-7 response object implementing the \Psr\Http\Message\ResponseInterface interface. By default you should aim to return a 
+Payload object. The PSR-7 response might come in handy when you have to deal with file downloads where you most 
+likely not want to read the file in your action class, push the content to the responder just to to write it to the response message body.
 
-Action classes are allowed to either return a DomainPayload object (\bitExpert\Adroit\Domain\DomainPayload) or an PSR-7
-response object implementing the \Psr\Http\Message\ResponseInterface interface. By default you should aim to return a 
-DomainPayload object. The PSR-7 response might come in handy when you have to deal with file downloads where you most 
-likely not want to read the file in your action class, push the content to the responder just to to write it to the response
-message body.
-
-The Payload object takes an $type  as well as an array of domain data. The
-DomainPayload object will be passed "as-is" to the responder:
 
 ```php
 <?php 
-
 use Acme\Domain\CustomPayload;
 use bitExpert\Adroit\Action\Action;
 use Psr\Http\Message\ResponseInterface;
@@ -132,8 +121,8 @@ class HelloWorldAction implements Action
 Responders
 ----------
 
-Responders have to return a PSR-7 response object. Responders are not forced to implement (\bitExpert\Adroit\Responder\Responder)
-interface so you **may** use Closures as well but implementing the interface is recommended:
+Responders have to return a PSR-7 response object. Responders are not forced to implement the [Responder](src/bitExpert/Adroit/Responder/Responder.php) interface
+so you **may** use Closures as well but implementing the interface is recommended:
 
 ```php
 <?php 
@@ -163,35 +152,37 @@ Usage
 -----
 
 Since Adroit provides a handy set of middlewares to achieve ADR you simply have to configure your ActionResolver(s) and
-ResponderResolver(s). For the following example we use fictional "ArrayResolvers" which are configured using
+ResponderResolver(s). For the following example we use the ArrayContainer of [bitexpert/specialist](https://github.com/bitExpert/specialist)  which are configured using
 an array of mappings between the action identifier and the action and the domain payload type to the appropriate responder:
 
 
 ```php
 <?php
+use bitExpert\Specialist\Container\ArrayContainer;
 
-// create the action resolver
-$actionResolver = new ArrayActionResolver([
+$container = new ArrayContainer([
     'helloAction' => function (ServerRequestInterface $request, ResponseInterface $response) {
         return new CustomPayload('hello', [
             'name' => 'World'
         ]);
-    }
-]);
-
-
-// create the responder resolver
-$responderResolver = new ArrayResponderResolver([
+    },
     'hello' => function (Payload $domainPayload, ResponseInterface $response) {
         $request->getBody()->rewind();
         $request->getBody()->write('Hello ' . $domainPayload->getValue('name'));
         return $response;
-    };
+    };    
 ]);
+
+// create the action resolver
+$actionResolver = new ContainerActionResolver($container);
+
+
+// create the responder resolver
+$responderResolver = new ContainerResponderResolver($container);
 
 // Provide the request attribute where the routing result identifier is kept
 // and your resolvers
-$adroit = AdroitMiddleware::create('action', [$actionResolver], [$responderResolver]);
+$adroit = new AdroitMiddleware('action', [$actionResolver], [$responderResolver]);
 
 // create a request containing an action identifier inside the routing result attribute
 $request = ServerRequestFactory::fromGlobals()->withAttribute('action', 'helloAction');
