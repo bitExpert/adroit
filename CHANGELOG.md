@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 0.4.0 - TDB
+## 0.5.0 - TDB
 
 ### Added
 
@@ -19,6 +19,26 @@ All notable changes to this project will be documented in this file, in reverse 
 ### Fixed
 
 - Nothing.
+
+## 0.4.0
+
+### Added
+
+- [#18](https://github.com/bitExpert/adroit/pull/18) Added this file.
+- [#22](https://github.com/bitExpert/adroit/pull/22) Optimized interaction with Pathfinder
+- [#23](https://github.com/bitExpert/adroit/pull/23) Splitted middlewares (and removed routing completely)
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#21](https://github.com/bitExpert/adroit/pull/21) Fixed issues reported by SensioLabs Insight.
 
 ## 0.3.0
 
