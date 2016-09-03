@@ -165,8 +165,8 @@ $container = new ArrayContainer([
         ]);
     },
     'hello' => function (Payload $domainPayload, ResponseInterface $response) {
-        $request->getBody()->rewind();
-        $request->getBody()->write('Hello ' . $domainPayload->getValue('name'));
+        $response->getBody()->rewind();
+        $response->getBody()->write('Hello ' . $domainPayload->getValue('name'));
         return $response;
     };    
 ]);
