@@ -16,15 +16,15 @@
     }
   ],
   "require": {
-    "php": "^5.5|^7.0",
+    "php": "^7.0",
     "psr/http-message": "^1.0",
     "container-interop/container-interop": "^1.1.0",
     "zendframework/zend-stratigility": "^1.1.0",
     "bitexpert/slf4psrlog": "^0.1.0"
   },
   "require-dev": {
-    "phpunit/php-code-coverage": "^2.1.0",
-    "phpunit/phpunit": "^4.8",
+    "phpunit/php-code-coverage": "^4.0.1",
+    "phpunit/phpunit": "^5.5",
     "phake/phake": "2.*",
     "squizlabs/php_codesniffer": "^2.3",
     "phpdocumentor/phpdocumentor": "^2.8",
