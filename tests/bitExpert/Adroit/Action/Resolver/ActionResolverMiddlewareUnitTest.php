@@ -163,8 +163,9 @@ class ActionResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ServerRequestInterface $request,
             ResponseInterface $response,
             callable $next = null
-        ) use (&$called) {
+        ) use (&$called) : ResponseInterface {
             $called = true;
+            return $response;
         };
 
         $resolver = $this->resolvers[0];

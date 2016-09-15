@@ -19,5 +19,4 @@ use bitExpert\Adroit\Resolver\ResolveException;
  */
 class ActionResolveException extends ResolveException
 {
-
 }

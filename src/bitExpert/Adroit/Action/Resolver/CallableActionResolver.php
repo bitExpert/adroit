@@ -21,5 +21,4 @@ use bitExpert\Adroit\Resolver\CallableResolver;
  */
 class CallableActionResolver extends CallableResolver implements ActionResolver
 {
-
 }

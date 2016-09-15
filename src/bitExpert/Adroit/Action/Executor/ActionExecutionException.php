@@ -18,5 +18,4 @@ namespace bitExpert\Adroit\Action\Executor;
  */
 class ActionExecutionException extends \RuntimeException
 {
-
 }

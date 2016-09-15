@@ -67,7 +67,7 @@ abstract class AbstractResolverMiddleware
         ServerRequestInterface $request,
         ResponseInterface $response,
         callable $next = null
-    );
+    ) : ResponseInterface;
 
     /**
      * Returns whether given resolver is valid or not
@@ -75,7 +75,7 @@ abstract class AbstractResolverMiddleware
      * @param Resolver $resolver
      * @return bool
      */
-    abstract protected function isValidResolver(Resolver $resolver);
+    abstract protected function isValidResolver(Resolver $resolver) : bool;
 
     /**
      * Returns the identifier used for the resolver process
@@ -86,12 +86,12 @@ abstract class AbstractResolverMiddleware
     abstract protected function getIdentifier(ServerRequestInterface $request);
 
     /**
-     * Returns whether the resolved is valid or not
+     * Returns whether the resolved result is valid or not
      *
-     * @param $result
+     * @param mixed $result
      * @return bool
      */
-    protected function isValidResult($result)
+    protected function isValidResult($result) : bool
     {
         return is_callable($result);
     }
@@ -156,9 +156,9 @@ abstract class AbstractResolverMiddleware
 
     /**
      * @param ServerRequestInterface $request
-     * @return array|Resolver[]
+     * @return Resolver[]
      */
-    protected function getApplicableResolvers(ServerRequestInterface $request)
+    protected function getApplicableResolvers(ServerRequestInterface $request) : array
     {
         return $this->resolvers;
     }

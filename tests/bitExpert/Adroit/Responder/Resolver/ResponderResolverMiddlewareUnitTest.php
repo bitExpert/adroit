@@ -72,7 +72,7 @@ class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
         $secondResolver->expects($this->never())
             ->method('resolve');
 
-        $payload = $this->getMock(Payload::class);
+        $payload = $this->createMock(Payload::class);
 
         $request = new ServerRequest();
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
@@ -96,7 +96,7 @@ class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($this->createSimpleResponder()));
 
 
-        $payload = $this->getMock(Payload::class);
+        $payload = $this->createMock(Payload::class);
 
         $request = new ServerRequest();
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
@@ -121,7 +121,7 @@ class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(null));
 
 
-        $payload = $this->getMock(Payload::class);
+        $payload = $this->createMock(Payload::class);
 
         $request = new ServerRequest();
         $request = $request->withAttribute(self::$domainPayloadAttribute, $payload);
@@ -165,8 +165,9 @@ class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ServerRequestInterface $request,
             ResponseInterface $response,
             callable $next = null
-        ) use (&$called) {
+        ) use (&$called) : ResponseInterface {
             $called = true;
+            return $response;
         };
 
         $request = new ServerRequest();
@@ -187,12 +188,13 @@ class ResponderResolverMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ServerRequestInterface $request,
             ResponseInterface $response,
             callable $next = null
-        ) use (&$called) {
+        ) use (&$called) : ResponseInterface {
             $called = true;
+            return $response;
         };
 
         $request = new ServerRequest();
-        $payload = $this->getMock(Payload::class);
+        $payload = $this->createMock(Payload::class);
         $this->resolvers[0]->expects($this->once())
             ->method('resolve')
             ->will($this->returnValue($this->createSimpleResponder()));

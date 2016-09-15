@@ -18,15 +18,26 @@ use Zend\Diactoros\Response;
 
 class ResponderExecutorMiddleware
 {
+    /**
+     * @var string
+     */
     protected $responderAttribute;
+    /**
+     * @var string
+     */
     protected $domainPayloadAttribute;
 
-    public function __construct($responderAttribute, $domainPayloadAttribute)
+    /**
+     * Creates a new {@link \bitExpert\Adroit\Responder\Executor\ResponderExecutorMiddleware}.
+     *
+     * @param string $responderAttribute
+     * @param string $domainPayloadAttribute
+     */
+    public function __construct(string $responderAttribute, string $domainPayloadAttribute)
     {
         $this->responderAttribute = $responderAttribute;
         $this->domainPayloadAttribute = $domainPayloadAttribute;
     }
-
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
@@ -54,7 +65,7 @@ class ResponderExecutorMiddleware
 
         if (!is_callable($responder)) {
             throw new ResponderExecutionException(sprintf(
-                'Could not execute responder because it is not callable',
+                'Could not execute responder "%s" because it is not callable',
                 is_object($responder) ? get_class($responder) : (string) $responder
             ));
         }

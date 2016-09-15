@@ -22,5 +22,4 @@ use bitExpert\Adroit\Resolver\Resolver;
  */
 interface ActionResolver extends Resolver
 {
-
 }

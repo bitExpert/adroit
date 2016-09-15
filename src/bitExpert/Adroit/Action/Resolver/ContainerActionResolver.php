@@ -20,5 +20,4 @@ use bitExpert\Adroit\Resolver\ContainerResolver;
  */
 class ContainerActionResolver extends ContainerResolver implements ActionResolver
 {
-
 }

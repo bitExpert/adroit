@@ -32,7 +32,7 @@ interface Responder
      *
      * @param Payload $payload
      * @param ResponseInterface $response
-     * @return ResponseInterface
+     * @return ResponseInterface|null
      */
     public function __invoke(Payload $payload, ResponseInterface $response);
 }
