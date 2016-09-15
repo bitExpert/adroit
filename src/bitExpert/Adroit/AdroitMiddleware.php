@@ -141,8 +141,11 @@ class AdroitMiddleware extends MiddlewarePipe
     /**
      * @inheritdoc
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $out = null) : ResponseInterface
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $out = null
+    ) : ResponseInterface {
         $this->initialize();
         return parent::__invoke($request, $response, $out);
     }
@@ -203,8 +206,11 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param string $actionAttribute
      * @return ActionResolverMiddleware
      */
-    protected function getActionResolverMiddleware(array $actionResolvers, string $routingResultAttribute, string $actionAttribute) : ActionResolverMiddleware
-    {
+    protected function getActionResolverMiddleware(
+        array $actionResolvers,
+        string $routingResultAttribute,
+        string $actionAttribute
+    ) : ActionResolverMiddleware {
         return new ActionResolverMiddleware($actionResolvers, $routingResultAttribute, $actionAttribute);
     }
 
@@ -213,8 +219,10 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param string $payloadAttribute
      * @return ActionExecutorMiddleware
      */
-    protected function getActionExecutorMiddleware(string $actionAttribute, string $payloadAttribute) : ActionExecutorMiddleware
-    {
+    protected function getActionExecutorMiddleware(
+        string $actionAttribute,
+        string $payloadAttribute
+    ) : ActionExecutorMiddleware {
         return new ActionExecutorMiddleware($actionAttribute, $payloadAttribute);
     }
 
@@ -224,8 +232,11 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param string $responderAttribute
      * @return ResponderResolverMiddleware
      */
-    protected function getResponderResolverMiddleware(array $responderResolvers, string $payloadAttribute, string $responderAttribute) : ResponderResolverMiddleware
-    {
+    protected function getResponderResolverMiddleware(
+        array $responderResolvers,
+        string $payloadAttribute,
+        string $responderAttribute
+    ) : ResponderResolverMiddleware {
         return new ResponderResolverMiddleware($responderResolvers, $payloadAttribute, $responderAttribute);
     }
 
@@ -234,8 +245,10 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param string $payloadAttribute
      * @return ResponderExecutorMiddleware
      */
-    protected function getResponderExecutorMiddleware(string $responderAttribute, string $payloadAttribute) : ResponderExecutorMiddleware
-    {
+    protected function getResponderExecutorMiddleware(
+        string $responderAttribute,
+        string $payloadAttribute
+    ) : ResponderExecutorMiddleware {
         return new ResponderExecutorMiddleware($responderAttribute, $payloadAttribute);
     }
 }

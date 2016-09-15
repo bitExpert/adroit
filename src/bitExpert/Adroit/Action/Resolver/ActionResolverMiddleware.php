@@ -49,8 +49,11 @@ class ActionResolverMiddleware extends AbstractResolverMiddleware
      * @throws ActionResolveException
      * @throws ActionExecutionException
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $next = null
+    ) : ResponseInterface {
         try {
             /* @var $action callable */
             $action = $this->resolve($request);

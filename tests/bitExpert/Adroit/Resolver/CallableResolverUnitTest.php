@@ -36,7 +36,6 @@ class CallableResolverUnitTest extends \PHPUnit_Framework_TestCase
     public function returnsArgumentIfCallable()
     {
         $identifier = function () {
-
         };
         
         $result = $this->resolver->resolve($identifier);

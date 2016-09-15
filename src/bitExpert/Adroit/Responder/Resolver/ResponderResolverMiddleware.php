@@ -50,8 +50,11 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware
      * @inheritdoc
      * @throws ResponderResolveException
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $next = null
+    ) : ResponseInterface {
         $domainPayload = $request->getAttribute($this->domainPayloadAttribute);
 
         // if the return value is a response instance, directly return it
