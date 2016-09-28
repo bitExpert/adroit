@@ -14,6 +14,7 @@ namespace bitExpert\Adroit\Responder;
 
 use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
 
 /**
  * A Responder is responsible for building a {@link \Psr\Http\Message\ResponseInterface}
@@ -33,6 +34,7 @@ interface Responder
      * @param Payload $payload
      * @param ResponseInterface $response
      * @return ResponseInterface
+     * @throws RuntimeException
      */
     public function __invoke(Payload $payload, ResponseInterface $response);
 }
