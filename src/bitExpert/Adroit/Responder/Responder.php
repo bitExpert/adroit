@@ -36,5 +36,5 @@ interface Responder
      * @return ResponseInterface
      * @throws RuntimeException
      */
-    public function __invoke(Payload $payload, ResponseInterface $response);
+    public function __invoke(Payload $payload, ResponseInterface $response) : ResponseInterface;
 }

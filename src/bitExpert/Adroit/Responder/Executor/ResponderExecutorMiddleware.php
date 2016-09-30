@@ -39,6 +39,13 @@ class ResponderExecutorMiddleware
         $this->domainPayloadAttribute = $domainPayloadAttribute;
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param callable|null $next
+     * @return ResponseInterface
+     * @throws ResponderExecutionException
+     */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
     {
         $responder = $this->getResponder($request);
@@ -71,14 +78,6 @@ class ResponderExecutorMiddleware
         }
 
         $response = $responder($payload, $response);
-
-        if (!($response instanceof ResponseInterface)) {
-            throw new ResponderExecutionException(sprintf(
-                'The responder "%s" did not return an instance of "%s"',
-                is_object($responder) ? get_class($responder) : (string)$responder,
-                ResponseInterface::class
-            ));
-        }
 
         if ($next) {
             $response = $next($request, $response);

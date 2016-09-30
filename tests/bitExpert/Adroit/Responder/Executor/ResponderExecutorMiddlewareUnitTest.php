@@ -151,24 +151,6 @@ class ResponderExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @expectedException \bitExpert\Adroit\Responder\Executor\ResponderExecutionException
-     */
-    public function throwsExceptionIfResponderExecutionDoesNotReturnResponse()
-    {
-        $responder = $this->createMock(Responder::class, ['__invoke']);
-        $responder->expects($this->once())
-            ->method('__invoke')
-            ->will($this->returnValue(null));
-
-        $payload = $this->createMock(Payload::class);
-
-        $this->request = $this->request->withAttribute(self::$responderAttribute, $responder);
-        $this->request = $this->request->withAttribute(self::$payloadAttribute, $payload);
-        $this->middleware->__invoke($this->request, $this->response);
-    }
-
-    /**
-     * @test
      */
     public function callsNextMiddlewareIfResponderReturnedAResponse()
     {
