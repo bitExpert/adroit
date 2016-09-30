@@ -8,8 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types = 1);
+
 namespace bitExpert\Adroit\Action\Executor;
 
+use bitExpert\Adroit\Action\Action;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
@@ -55,7 +58,7 @@ class ActionExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      */
     public function executesActionIfPresent()
     {
-        $action = $this->getMock(Action::class, ['__invoke']);
+        $action = $this->createMock(Action::class, ['__invoke']);
         $action->expects($this->once())
             ->method('__invoke')
             ->will($this->returnValue($this->response));
@@ -104,7 +107,7 @@ class ActionExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      */
     public function throwsExceptionIfActionExecutionDoesNotReturnPayloadOrResponse()
     {
-        $action = $this->getMock(Action::class, ['__invoke']);
+        $action = $this->createMock(Action::class, ['__invoke']);
         $action->expects($this->once())
             ->method('__invoke')
             ->will($this->returnValue(null));

@@ -8,6 +8,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types = 1);
+
 namespace bitExpert\Adroit\Action\Resolver;
 
 use bitExpert\Adroit\Resolver\AbstractResolverMiddleware;
@@ -34,7 +36,7 @@ class ActionResolverMiddleware extends AbstractResolverMiddleware
      * @param string $routingResultAttribute
      * @throws \InvalidArgumentException
      */
-    public function __construct(array $resolvers, $routingResultAttribute, $actionAttribute)
+    public function __construct(array $resolvers, string $routingResultAttribute, string $actionAttribute)
     {
         parent::__construct($resolvers);
 
@@ -47,8 +49,11 @@ class ActionResolverMiddleware extends AbstractResolverMiddleware
      * @throws ActionResolveException
      * @throws ActionExecutionException
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $next = null
+    ) : ResponseInterface {
         try {
             /* @var $action callable */
             $action = $this->resolve($request);
@@ -67,7 +72,7 @@ class ActionResolverMiddleware extends AbstractResolverMiddleware
     /**
      * @inheritdoc
      */
-    protected function isValidResolver(Resolver $resolver)
+    protected function isValidResolver(Resolver $resolver) : bool
     {
         return ($resolver instanceof ActionResolver);
     }

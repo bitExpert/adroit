@@ -8,8 +8,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types = 1);
+
 namespace bitExpert\Adroit\Responder\Executor;
 
+use bitExpert\Adroit\Domain\Payload;
+use bitExpert\Adroit\Responder\Responder;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
@@ -60,12 +64,12 @@ class ResponderExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      */
     public function executesResponderIfResponderAndPayloadPresent()
     {
-        $responder = $this->getMock(Responder::class, ['__invoke']);
+        $responder = $this->createMock(Responder::class, ['__invoke']);
         $responder->expects($this->once())
             ->method('__invoke')
             ->will($this->returnValue($this->response));
 
-        $payload = $this->getMock(Payload::class);
+        $payload = $this->createMock(Payload::class);
 
         $this->request = $this->request->withAttribute(self::$responderAttribute, $responder);
         $this->request = $this->request->withAttribute(self::$payloadAttribute, $payload);
@@ -78,7 +82,7 @@ class ResponderExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      */
     public function throwsExceptionIfPayloadNotPresentInRequest()
     {
-        $responder = $this->getMock(Responder::class, ['__invoke']);
+        $responder = $this->createMock(Responder::class, ['__invoke']);
         $responder->expects($this->never())
             ->method('__invoke');
 
@@ -92,7 +96,7 @@ class ResponderExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
      */
     public function throwsExceptionIfResponderNotPresentInRequest()
     {
-        $payload = $this->getMock(Payload::class);
+        $payload = $this->createMock(Payload::class);
         $this->request = $this->request->withAttribute(self::$payloadAttribute, $payload);
         $this->middleware->__invoke($this->request, $this->response);
     }
@@ -105,7 +109,7 @@ class ResponderExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
     {
         $responder = 'notCallable';
 
-        $payload = $this->getMock(Payload::class);
+        $payload = $this->createMock(Payload::class);
 
         $this->request = $this->request->withAttribute(self::$responderAttribute, $responder);
         $this->request = $this->request->withAttribute(self::$payloadAttribute, $payload);
@@ -147,24 +151,6 @@ class ResponderExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @expectedException \bitExpert\Adroit\Responder\Executor\ResponderExecutionException
-     */
-    public function throwsExceptionIfResponderExecutionDoesNotReturnResponse()
-    {
-        $responder = $this->getMock(Responder::class, ['__invoke']);
-        $responder->expects($this->once())
-            ->method('__invoke')
-            ->will($this->returnValue(null));
-
-        $payload = $this->getMock(Payload::class);
-
-        $this->request = $this->request->withAttribute(self::$responderAttribute, $responder);
-        $this->request = $this->request->withAttribute(self::$payloadAttribute, $payload);
-        $this->middleware->__invoke($this->request, $this->response);
-    }
-
-    /**
-     * @test
      */
     public function callsNextMiddlewareIfResponderReturnedAResponse()
     {
@@ -174,16 +160,17 @@ class ResponderExecutorMiddlewareUnitTest extends \PHPUnit_Framework_TestCase
             ServerRequestInterface $request,
             ResponseInterface $response,
             callable $next = null
-        ) use (&$called) {
+        ) use (&$called) : ResponseInterface {
             $called = true;
+            return $response;
         };
 
-        $responder = $this->getMock(Responder::class, ['__invoke']);
+        $responder = $this->createMock(Responder::class, ['__invoke']);
         $responder->expects($this->once())
             ->method('__invoke')
             ->will($this->returnValue(new Response()));
 
-        $payload = $this->getMock(Payload::class);
+        $payload = $this->createMock(Payload::class);
 
         $this->request = $this->request->withAttribute(self::$responderAttribute, $responder);
         $this->request = $this->request->withAttribute(self::$payloadAttribute, $payload);

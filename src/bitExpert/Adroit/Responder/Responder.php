@@ -8,10 +8,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types = 1);
+
 namespace bitExpert\Adroit\Responder;
 
 use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
 
 /**
  * A Responder is responsible for building a {@link \Psr\Http\Message\ResponseInterface}
@@ -31,6 +34,7 @@ interface Responder
      * @param Payload $payload
      * @param ResponseInterface $response
      * @return ResponseInterface
+     * @throws RuntimeException
      */
-    public function __invoke(Payload $payload, ResponseInterface $response);
+    public function __invoke(Payload $payload, ResponseInterface $response) : ResponseInterface;
 }

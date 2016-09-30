@@ -8,6 +8,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types = 1);
+
 namespace bitExpert\Adroit\Responder\Resolver;
 
 use bitExpert\Adroit\Resolver\Resolver;
@@ -20,5 +22,4 @@ use bitExpert\Adroit\Resolver\Resolver;
  */
 interface ResponderResolver extends Resolver
 {
-
 }

@@ -8,6 +8,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types = 1);
+
 namespace bitExpert\Adroit;
 
 use bitExpert\Adroit\Action\Action;
@@ -88,9 +90,9 @@ class AdroitMiddleware extends MiddlewarePipe
      * (chainable)
      *
      * @param callable $middleware
-     * @return $this
+     * @return AdroitMiddleware
      */
-    public function beforeResolveAction(callable $middleware)
+    public function beforeResolveAction(callable $middleware) : self
     {
         $this->beforeActionResolverMiddlewares[] = $middleware;
         return $this;
@@ -101,9 +103,9 @@ class AdroitMiddleware extends MiddlewarePipe
      * (chainable)
      *
      * @param callable $middleware
-     * @return $this
+     * @return AdroitMiddleware
      */
-    public function beforeExecuteAction(callable $middleware)
+    public function beforeExecuteAction(callable $middleware) : self
     {
         $this->beforeActionExecutorMiddlewares[] = $middleware;
         return $this;
@@ -114,9 +116,9 @@ class AdroitMiddleware extends MiddlewarePipe
      * (chainable)
      *
      * @param callable $middleware
-     * @return $this
+     * @return AdroitMiddleware
      */
-    public function beforeResolveResponder(callable $middleware)
+    public function beforeResolveResponder(callable $middleware) : self
     {
         $this->beforeResponderResolverMiddlewares[] = $middleware;
         return $this;
@@ -127,9 +129,9 @@ class AdroitMiddleware extends MiddlewarePipe
      * (chainable)
      *
      * @param callable $middleware
-     * @return $this
+     * @return AdroitMiddleware
      */
-    public function beforeExecuteResponder(callable $middleware)
+    public function beforeExecuteResponder(callable $middleware) : self
     {
         $this->beforeResponderExecutorMiddlewares[] = $middleware;
         return $this;
@@ -139,14 +141,18 @@ class AdroitMiddleware extends MiddlewarePipe
     /**
      * @inheritdoc
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $out = null)
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $out = null
+    ) : ResponseInterface {
         $this->initialize();
         return parent::__invoke($request, $response, $out);
     }
 
     /**
-     * Pipes all given middlewares
+     * Pipes all given middlewares.
+     *
      * @param callable[] $middlewares
      */
     protected function pipeEach(array $middlewares)
@@ -158,7 +164,7 @@ class AdroitMiddleware extends MiddlewarePipe
 
     /**
      * Initializes the application by piping the fixed middlewares (routing, action, responder)
-     * and the configured middlewares in the right order
+     * and the configured middlewares in the right order.
      */
     protected function initialize()
     {
@@ -200,8 +206,11 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param string $actionAttribute
      * @return ActionResolverMiddleware
      */
-    protected function getActionResolverMiddleware($actionResolvers, $routingResultAttribute, $actionAttribute)
-    {
+    protected function getActionResolverMiddleware(
+        array $actionResolvers,
+        string $routingResultAttribute,
+        string $actionAttribute
+    ) : ActionResolverMiddleware {
         return new ActionResolverMiddleware($actionResolvers, $routingResultAttribute, $actionAttribute);
     }
 
@@ -210,8 +219,10 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param string $payloadAttribute
      * @return ActionExecutorMiddleware
      */
-    protected function getActionExecutorMiddleware($actionAttribute, $payloadAttribute)
-    {
+    protected function getActionExecutorMiddleware(
+        string $actionAttribute,
+        string $payloadAttribute
+    ) : ActionExecutorMiddleware {
         return new ActionExecutorMiddleware($actionAttribute, $payloadAttribute);
     }
 
@@ -221,8 +232,11 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param string $responderAttribute
      * @return ResponderResolverMiddleware
      */
-    protected function getResponderResolverMiddleware($responderResolvers, $payloadAttribute, $responderAttribute)
-    {
+    protected function getResponderResolverMiddleware(
+        array $responderResolvers,
+        string $payloadAttribute,
+        string $responderAttribute
+    ) : ResponderResolverMiddleware {
         return new ResponderResolverMiddleware($responderResolvers, $payloadAttribute, $responderAttribute);
     }
 
@@ -231,8 +245,10 @@ class AdroitMiddleware extends MiddlewarePipe
      * @param string $payloadAttribute
      * @return ResponderExecutorMiddleware
      */
-    protected function getResponderExecutorMiddleware($responderAttribute, $payloadAttribute)
-    {
+    protected function getResponderExecutorMiddleware(
+        string $responderAttribute,
+        string $payloadAttribute
+    ) : ResponderExecutorMiddleware {
         return new ResponderExecutorMiddleware($responderAttribute, $payloadAttribute);
     }
 }

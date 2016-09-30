@@ -8,6 +8,8 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+declare(strict_types = 1);
+
 namespace bitExpert\Adroit\Responder\Resolver;
 
 use bitExpert\Adroit\Resolver\AbstractResolverMiddleware;
@@ -36,7 +38,7 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware
      * @param string $responderAttribute
      * @throws \InvalidArgumentException
      */
-    public function __construct(array $resolvers, $domainPayloadAttribute, $responderAttribute)
+    public function __construct(array $resolvers, string $domainPayloadAttribute, string $responderAttribute)
     {
         parent::__construct($resolvers);
 
@@ -48,8 +50,11 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware
      * @inheritdoc
      * @throws ResponderResolveException
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $next = null
+    ) : ResponseInterface {
         $domainPayload = $request->getAttribute($this->domainPayloadAttribute);
 
         // if the return value is a response instance, directly return it
@@ -94,7 +99,7 @@ class ResponderResolverMiddleware extends AbstractResolverMiddleware
     /**
      * @inheritdoc
      */
-    protected function isValidResolver(Resolver $resolver)
+    protected function isValidResolver(Resolver $resolver) : bool
     {
         return ($resolver instanceof ResponderResolver);
     }
