@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 0.5.0 - TDB
+## 0.5.0
 
 ### Added
 
@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Deprecated
 
-- Nothing.
+- [#25](https://github.com/bitExpert/adroit/pull/25) Dropping PHP 5.x support
 
 ### Removed
 
