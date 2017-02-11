@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
-## 0.6.0 - TBD
+## 0.6.0
 
 ### Added
 
@@ -14,11 +14,11 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Removed
 
-- Nothing.
+- [#29](https://github.com/bitExpert/adroit/pull/29) Remove Phake dev dependency as it is not used
 
 ### Fixed
 
-- Nothing.
+- [#28](https://github.com/bitExpert/adroit/pull/28) Set minimum stratigility version to 1.3
 
 ## 0.5.0
 
