@@ -22,6 +22,7 @@ use bitExpert\Adroit\Domain\Payload;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Stratigility\MiddlewarePipe;
+use Zend\Stratigility\NoopFinalHandler;
 
 /**
  * MiddlewarePipe implementation for an Adroit web application.
@@ -146,6 +147,7 @@ class AdroitMiddleware extends MiddlewarePipe
         ResponseInterface $response,
         callable $out = null
     ) : ResponseInterface {
+        $out = $out ?: new NoopFinalHandler();
         $this->initialize();
         return parent::__invoke($request, $response, $out);
     }
