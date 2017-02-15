@@ -13,7 +13,7 @@ declare(strict_types = 1);
 namespace bitExpert\Adroit\Resolver;
 
 use bitExpert\Slf4PsrLog\LoggerFactory;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Implementation of an {@link \bitExpert\Adroit\Resolver\Resolver} which will
@@ -44,8 +44,7 @@ class ContainerResolver implements Resolver
 
     /**
      * {@inheritDoc}
-     * @throws \Interop\Container\Exception\ContainerException
-     * @throws \Interop\Container\Exception\NotFoundException
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
     public function resolve($identifier)
     {
