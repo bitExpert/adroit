@@ -12,8 +12,8 @@ declare(strict_types = 1);
 
 namespace bitExpert\Adroit\Resolver;
 
+use Psr\Container\ContainerInterface;
 use Zend\Diactoros\Response;
-use Interop\Container\ContainerInterface;
 
 /**
  * Unit test for {@link \bitExpert\Adroit\Resolver\ContainerAwareResolver}.
