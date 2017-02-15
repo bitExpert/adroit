@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 0.7.0
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- [#30](https://github.com/bitExpert/adroit/pull/30) Migrate container-interop dependency to PSR-11
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
 ## 0.6.0
 
 ### Added
