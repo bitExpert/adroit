@@ -23,7 +23,6 @@
     "bitexpert/slf4psrlog": "^0.1.0"
   },
   "require-dev": {
-    "phpunit/php-code-coverage": "^4.0.1",
     "phpunit/phpunit": "^5.5",
     "squizlabs/php_codesniffer": "^2.3",
     "phpdocumentor/phpdocumentor": "^2.8",
