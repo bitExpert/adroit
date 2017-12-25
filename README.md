@@ -2,7 +2,6 @@
 This package provides a [PSR-7](http://www.php-fig.org/psr/psr-7/) compatible [ADR](http://pmjones.io/adr/) middleware. 
 
 [![Build Status](https://travis-ci.org/bitExpert/adroit.svg?branch=master)](https://travis-ci.org/bitExpert/adroit)
-[![Dependency Status](https://www.versioneye.com/user/projects/57d9b37c4307470032353cd9/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57d9b37c4307470032353cd9)
 [![Coverage Status](https://coveralls.io/repos/github/bitExpert/adroit/badge.svg?branch=master)](https://coveralls.io/github/bitExpert/adroit?branch=master)
 
 Installation
